@@ -62,8 +62,8 @@ public class Function extends Action {
 
             String freeBookURL = searchEls.first().attr("href");
 
-            String tweet = String.format("Packt's free eBook of the day is %s!\\n%s\\n\\nSee %s for more info.",
-                    freeBookTitle, freeBookURL, freeLearningURL);
+            String tweet = String.format("%s is the free eBook of the day from Packt!\\n\\Visit %s to claim the eBook and %s for more info about the title.",
+                    freeBookTitle, freeLearningURL, freeBookURL);
             System.out.println("Finished tweet = " + tweet);
 
             postToTwitter(tweet);
