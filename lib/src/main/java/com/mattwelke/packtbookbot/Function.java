@@ -11,11 +11,12 @@ import com.owextendedruntimes.actiontest.Action;
 import com.stackoverflow.smile.TwitterOauthHeaderGenerator;
 
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -36,9 +37,21 @@ public class Function extends Action {
     private static final String token = "1477507964298739712-VFdoDZug9ifkvA9GX89rEqoywZnblu";
     private static final String tokenSecret = "amKCrk4X7XKNEqwdDR901sBRy2WhgXr5CrxKWc5bhRuBf";
 
+    // HTTP client settings for web scraping
+    // long timeout is because Packt's search function can sometimes be very slow
+    private static final int httpTimeoutSec = 60;
+    private static HttpClient httpClient;
+
     @Override
     public Map<String, Object> invoke(Map<String, Object> input) {
         try {
+            RequestConfig config = RequestConfig.custom()
+                    .setConnectTimeout(httpTimeoutSec * 1000)
+                    .setConnectionRequestTimeout(httpTimeoutSec * 1000)
+                    .setSocketTimeout(httpTimeoutSec * 1000).build();
+
+            httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+
             Document freeBookDoc = Jsoup.connect(freeLearningURL).get();
             Elements freeBookEls = freeBookDoc.select(titleSelector);
 
@@ -62,20 +75,18 @@ public class Function extends Action {
 
             String freeBookURL = searchEls.first().attr("href");
 
-            String tweet = String.format("%s is the free eBook of the day from Packt!\\n\\Visit %s to claim the eBook and %s for more info about the title.",
+            String tweet = String.format(
+                    "%s is the free eBook of the day from Packt!\\n\\Visit %s to claim the eBook and %s for more info about the title.",
                     freeBookTitle, freeLearningURL, freeBookURL);
             System.out.println("Finished tweet = " + tweet);
 
             postToTwitter(tweet);
 
             System.out.println("Done posting to twitter.");
-        } catch (IOException e) {
+        }
+         catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Error getting page: " + e.getMessage());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Unknown error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
 
         return Map.of("done", (Object) "ye");
@@ -84,21 +95,18 @@ public class Function extends Action {
     private static void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
         final var json = "application/json";
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost request = new HttpPost(twitterURL);
+        HttpPost request = new HttpPost(twitterURL);
 
-            request.addHeader(
-                    HttpHeaders.AUTHORIZATION,
-                    new TwitterOauthHeaderGenerator(consumerKey, consumerSecret, token, tokenSecret)
-                            .generateHeader("POST", twitterURL, new HashMap<String, String>()));
-            request.addHeader(HttpHeaders.CONTENT_TYPE, json);
+        request.addHeader(
+                HttpHeaders.AUTHORIZATION,
+                new TwitterOauthHeaderGenerator(consumerKey, consumerSecret, token, tokenSecret)
+                        .generateHeader("POST", twitterURL, new HashMap<String, String>()));
+        request.addHeader(HttpHeaders.CONTENT_TYPE, json);
 
-            request.setEntity(new StringEntity("{\"text\":\"" + tweetBody + "\"}"));
+        request.setEntity(new StringEntity("{\"text\":\"" + tweetBody + "\"}"));
 
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                System.out.println("Twitter API request complete. Response status = " +
-                        response.getStatusLine());
-            }
-        }
+        HttpResponse response = httpClient.execute(request);
+        System.out.println("Twitter API request complete. Response status = " +
+                response.getStatusLine());
     }
 }
