@@ -4,11 +4,11 @@ Twitter bot (https://twitter.com/PacktBookBot) that tweets on a schedule.
 
 ![Screenshot of free eBook of the day tweet](img/free_example.png)
 
-## Current features:
+## Current features
 
 - Free eBook of the day - every day at 12:01am UTC
 
-## Future features:
+## Future features
 
 - Monitoring for new titles, posting them as they are released (only if Packt Twitter handle doesn't do this already)
 
@@ -16,6 +16,14 @@ Twitter bot (https://twitter.com/PacktBookBot) that tweets on a schedule.
 
 Written using Java 17, deployed to IBM Cloud Functions using the custom Java 17 runtime from https://github.com/ow-extended-runtimes/java-17.
 
-**Why Java?** I wanted to practice my Java.
+**Why Java?**
 
-**Why IBM Cloud?** They have a good free tier for FaaS functions and periodic scheduled events to trigger them.
+* I wanted to practice my Java.
+* For this use case, slow startup speed (about half a second in this case) is good enough for the use case.
+
+**Why IBM Cloud?**
+
+* They have a good free tier for FaaS functions.
+  * This includes invocations.
+  * This also includes periodic scheduled events to trigger them ([OpenWhisk alarms](https://github.com/apache/openwhisk-package-alarms/blob/master/provider/lib/cronAlarm.js)).
+* Their FaaS service is powered by the open source FaaS project [Apache OpenWhisk](https://openwhisk.apache.org/)! 
