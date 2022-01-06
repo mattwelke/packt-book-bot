@@ -42,8 +42,11 @@ public class Function extends Action {
     private static final int httpTimeoutSec = 60;
     private static HttpClient httpClient;
 
+    /**
+     * Implementation of action invoke method.
+     */
     @Override
-    public Map<String, Object> invoke(Map<String, Object> input) {
+    public Map<String, Object> invoke(Map<String, Object> params) {
         try {
             httpClient = HttpClientBuilder.create().setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectTimeout(httpTimeoutSec * 1000)
@@ -88,7 +91,11 @@ public class Function extends Action {
                     freeBookTitle, pubDate, authorsStr, freeLearningURL, freeBookURL);
             System.out.println("Finished tweet = " + tweet);
 
-            postToTwitter(tweet);
+            postToTwitter(tweet, new TwitterSecrets(
+                    (String) params.get("twitterConsumerKey"),
+                    (String) params.get("twitterConsumerSecret"),
+                    (String) params.get("twitterToken"),
+                    (String) params.get("twitterTokenSecret")));
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error: " + e.getMessage());
@@ -100,11 +107,12 @@ public class Function extends Action {
 
     /**
      * Given a tweet body, tweets it.
+     * 
      * @param tweetBody The tweet body.
      * @throws URISyntaxException
      * @throws IOException
      */
-    private void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
+    private void postToTwitter(String tweetBody, TwitterSecrets secrets) throws URISyntaxException, IOException {
         final String json = "application/json";
 
         final String consumerKey = (String) clusterContext.get("twitterConsumerKey");
@@ -129,7 +137,10 @@ public class Function extends Action {
     }
 
     /**
-     * Given a Packt book title, returns a URL that can be expected to be the product page URL where data such as author(s), publication date, can be found.
+     * Given a Packt book title, returns a URL that can be expected to be the
+     * product page URL where data such as author(s), publication date, can be
+     * found.
+     * 
      * @param title The Packt book title.
      * @return The URL that can be expected to be the product page.
      * @throws IOException
@@ -148,7 +159,10 @@ public class Function extends Action {
     }
 
     /**
-     * Given a Packt book title, returns a URL that can be used to perform a Google search for the title where the top result can be expected to be the product page for the title.
+     * Given a Packt book title, returns a URL that can be used to perform a Google
+     * search for the title where the top result can be expected to be the product
+     * page for the title.
+     * 
      * @param title The Packt book title.
      * @return The URL to use to search for the product page.
      */
