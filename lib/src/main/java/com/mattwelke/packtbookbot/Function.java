@@ -106,26 +106,26 @@ public class Function extends Action {
     }
 
     /**
-     * Given a tweet body, tweets it.
-     * 
-     * @param tweetBody The tweet body.
+     * Given a tweet and secrets for the Twitter API, tweets the tweet.
+     * @param tweetBody The tweet to be tweeted.
+     * @param secrets The secrets.
      * @throws URISyntaxException
      * @throws IOException
      */
     private void postToTwitter(String tweetBody, TwitterSecrets secrets) throws URISyntaxException, IOException {
         final String json = "application/json";
 
-        final String consumerKey = (String) clusterContext.get("twitterConsumerKey");
-        final String consumerSecret = (String) clusterContext.get("twitterConsumerSecret");
-        final String token = (String) clusterContext.get("twitterToken");
-        final String tokenSecret = (String) clusterContext.get("twitterTokenSecret");
-
         HttpPost request = new HttpPost(twitterURL);
 
-        request.addHeader(
-                HttpHeaders.AUTHORIZATION,
-                new TwitterOauthHeaderGenerator(consumerKey, consumerSecret, token, tokenSecret)
-                        .generateHeader("POST", twitterURL, new HashMap<String, String>()));
+        TwitterOauthHeaderGenerator headerGenerator = new TwitterOauthHeaderGenerator(
+                secrets.consumerKey(),
+                secrets.consumerSecret(),
+                secrets.token(),
+                secrets.tokenSecret());
+
+        var header = headerGenerator.generateHeader("POST", twitterURL, new HashMap<String, String>());
+
+        request.addHeader(HttpHeaders.AUTHORIZATION, header);
         request.addHeader(HttpHeaders.CONTENT_TYPE, json);
 
         request.setEntity(new StringEntity("{\"text\":\"" + tweetBody + "\"}"));
