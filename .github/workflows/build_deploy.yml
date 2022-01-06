@@ -1,0 +1,27 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - uses: gradle/wrapper-validation-action@v1
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -sL https://raw.githubusercontent.com/IBM-Cloud/ibm-cloud-developer-tools/master/linux-installer/idt-installer | bash
+    - name: Build and Deploy
+      env:
+        DEPLOY_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+        TWITTER_TOKEN: ${{ secrets.TWITTER_TOKEN }}
+        TWITTER_TOKEN_SECRET: ${{ secrets.TWITTER_TOKEN_SECRET }}
+      run: ./scripts/deploy.sh $DEPLOY_API_KEY $TWITTER_CONSUMER_KEY $TWITTER_CONSUMER_SECRET $TWITTER_TOKEN $TWITTER_TOKEN_SECRET

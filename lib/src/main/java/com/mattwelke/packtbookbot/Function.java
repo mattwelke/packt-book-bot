@@ -31,26 +31,19 @@ public class Function extends Action {
     private static final String twitterURL = "https://api.twitter.com/2/tweets";
     private static final String titleSelector = "h3.product-info__title";
 
-    // Secrets - rotate before making repo public
-    private static final String consumerKey = "YPn8qTcTKp983e5cjoiJ733xa";
-    private static final String consumerSecret = "aI6HTUIfXB7rhP0fwCne5gQQhrGZ3vhjRc6JLrEOQoJBAwA7WV";
-    private static final String token = "1477507964298739712-VFdoDZug9ifkvA9GX89rEqoywZnblu";
-    private static final String tokenSecret = "amKCrk4X7XKNEqwdDR901sBRy2WhgXr5CrxKWc5bhRuBf";
-
     // HTTP client settings for web scraping
-    // long timeout is because Packt's search function can sometimes be very slow
+    // long timeout is because Packt's site can sometimes be slow.
     private static final int httpTimeoutSec = 60;
     private static HttpClient httpClient;
 
     @Override
     public Map<String, Object> invoke(Map<String, Object> input) {
         try {
-            RequestConfig config = RequestConfig.custom()
+            httpClient = HttpClientBuilder.create().setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectTimeout(httpTimeoutSec * 1000)
                     .setConnectionRequestTimeout(httpTimeoutSec * 1000)
-                    .setSocketTimeout(httpTimeoutSec * 1000).build();
-
-            httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+                    .setSocketTimeout(httpTimeoutSec * 1000).build())
+                    .build();
 
             Document freeBookDoc = Jsoup.connect(freeLearningURL).get();
             Elements freeBookEls = freeBookDoc.select(titleSelector);
@@ -81,8 +74,9 @@ public class Function extends Action {
             // Publication date
             var datalistEl = productPageDoc.select(".overview__datalist").first();
             String pubDate = datalistEl.children().stream()
-                .filter((Element el) -> el.select(".datalist__name").html().toLowerCase().contains("publication date"))
-                .findFirst().get().select(".datalist__value").html();
+                    .filter((Element el) -> el.select(".datalist__name").html().toLowerCase()
+                            .contains("publication date"))
+                    .findFirst().get().select(".datalist__value").html();
 
             String tweet = String.format(
                     "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook and %s for more info about the title.",
@@ -100,8 +94,13 @@ public class Function extends Action {
         return Map.of("done", (Object) "ye");
     }
 
-    private static void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
+    private void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
         final var json = "application/json";
+        
+        final var consumerKey = (String) clusterContext.get("twitterConsumerKey");
+        final var consumerSecret = (String) clusterContext.get("twitterConsumerSecret");
+        final var token = (String) clusterContext.get("twitterToken");
+        final var tokenSecret = (String) clusterContext.get("twitterSecret");
 
         HttpPost request = new HttpPost(twitterURL);
 
@@ -128,7 +127,8 @@ public class Function extends Action {
                 .findFirst().get();
 
         // Get the link from the search result - parent element is <a>
-        return titleSearchResult.parent().attr("href");
+        // return titleSearchResult.parent().attr("href");
+        return "https://www.packtpub.com/product/microsoft-365-word-tips-and-tricks/9781800565432";
     }
 
     private static String googleSearchURL(String title) {
@@ -136,4 +136,9 @@ public class Function extends Action {
         return String.format("https://google.com/search?q=%s",
                 URLEncoder.encode(googleSearchQuery, StandardCharsets.UTF_8));
     }
+
+    public static void main(String[] args) {
+        new Function().invoke(Map.of());
+    }
+
 }
