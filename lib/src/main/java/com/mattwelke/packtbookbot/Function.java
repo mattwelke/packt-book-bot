@@ -103,7 +103,7 @@ public class Function extends Action {
         final String consumerKey = (String) clusterContext.get("twitterConsumerKey");
         final String consumerSecret = (String) clusterContext.get("twitterConsumerSecret");
         final String token = (String) clusterContext.get("twitterToken");
-        final String tokenSecret = (String) clusterContext.get("twitterSecret");
+        final String tokenSecret = (String) clusterContext.get("twitterTokenSecret");
 
         HttpPost request = new HttpPost(twitterURL);
 
