@@ -29,7 +29,13 @@ import org.jsoup.select.Elements;
 public class Function extends Action {
     private static final String freeLearningURL = "https://www.packtpub.com/free-learning";
     private static final String twitterURL = "https://api.twitter.com/2/tweets";
-    private static final String titleSelector = "h3.product-info__title";
+
+    // CSS selectors
+    private static final String freeBookPageTitleSelector = "h3.product-info__title";
+    private static final String productPageAuthorsSelector = ".product-info__author";
+    private static final String productPageDatalistSelector = ".overview__datalist";
+    private static final String productPageDatalistNameSelector = ".datalist__name";
+    private static final String productPageDatalistValueSelector = ".datalist__value";
 
     // HTTP client settings for web scraping
     // long timeout is because Packt's site can sometimes be slow.
@@ -46,37 +52,36 @@ public class Function extends Action {
                     .build();
 
             Document freeBookDoc = Jsoup.connect(freeLearningURL).get();
-            Elements freeBookEls = freeBookDoc.select(titleSelector);
+            Elements freeBookEls = freeBookDoc.select(freeBookPageTitleSelector);
 
             if (freeBookEls.size() == 0) {
-                System.err.println("Selector (" + titleSelector + ") found no elements. Cannot continue.");
+                System.err.println("Selector (" + freeBookPageTitleSelector + ") found no elements. Cannot continue.");
             }
             if (freeBookEls.size() > 1) {
-                System.err.println("Selector (" + titleSelector + ") found multiple elements. Cannot continue.");
+                System.err.println(
+                        "Selector (" + freeBookPageTitleSelector + ") found multiple elements. Cannot continue.");
             }
 
-            var freeBookTitle = freeBookEls.first().text().replace("Free eBook - ", "");
+            String freeBookTitle = freeBookEls.first().text().replace("Free eBook - ", "");
 
-            var author = freeBookDoc.select(".free_learning__author").first().html().trim().replace("By ", "");
+            System.out.println("Done parsing free book page. Title is " + freeBookTitle + ".");
 
-            System.out.println("Done parsing. Free book of the day is " + freeBookTitle + ".");
+            String freeBookURL = productPageURL(freeBookTitle);
 
-            var freeBookURL = productPageURL(freeBookTitle);
-
-            var productPageDoc = Jsoup.connect(freeBookURL).get();
+            Document productPageDoc = Jsoup.connect(freeBookURL).get();
 
             // Author(s)
-            var authorsEl = productPageDoc.select(".product-info__author").first();
-            var authors = authorsEl.html().trim().replace("By ", "").replace(" , ", ", ");
-            var authorsStrBase = authors.contains(",") ? "Authors" : "Author";
-            var authorsStr = String.format("%s: %s", authorsStrBase, authors);
+            Element authorsEl = productPageDoc.select(productPageAuthorsSelector).first();
+            String authors = authorsEl.html().trim().replace("By ", "").replace(" , ", ", ");
+            String authorsStrBase = authors.contains(",") ? "Authors" : "Author";
+            String authorsStr = String.format("%s: %s", authorsStrBase, authors);
 
             // Publication date
-            var datalistEl = productPageDoc.select(".overview__datalist").first();
+            Element datalistEl = productPageDoc.select(productPageDatalistSelector).first();
             String pubDate = datalistEl.children().stream()
-                    .filter((Element el) -> el.select(".datalist__name").html().toLowerCase()
+                    .filter((Element el) -> el.select(productPageDatalistNameSelector).html().toLowerCase()
                             .contains("publication date"))
-                    .findFirst().get().select(".datalist__value").html();
+                    .findFirst().get().select(productPageDatalistValueSelector).html();
 
             String tweet = String.format(
                     "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook and %s for more info about the title.",
@@ -84,8 +89,6 @@ public class Function extends Action {
             System.out.println("Finished tweet = " + tweet);
 
             postToTwitter(tweet);
-
-            System.out.println("Finished posting to twitter.");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error: " + e.getMessage());
@@ -95,12 +98,12 @@ public class Function extends Action {
     }
 
     private void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
-        final var json = "application/json";
-        
-        final var consumerKey = (String) clusterContext.get("twitterConsumerKey");
-        final var consumerSecret = (String) clusterContext.get("twitterConsumerSecret");
-        final var token = (String) clusterContext.get("twitterToken");
-        final var tokenSecret = (String) clusterContext.get("twitterSecret");
+        final String json = "application/json";
+
+        final String consumerKey = (String) clusterContext.get("twitterConsumerKey");
+        final String consumerSecret = (String) clusterContext.get("twitterConsumerSecret");
+        final String token = (String) clusterContext.get("twitterToken");
+        final String tokenSecret = (String) clusterContext.get("twitterSecret");
 
         HttpPost request = new HttpPost(twitterURL);
 
@@ -113,6 +116,7 @@ public class Function extends Action {
         request.setEntity(new StringEntity("{\"text\":\"" + tweetBody + "\"}"));
 
         HttpResponse response = httpClient.execute(request);
+
         System.out.println("Finished posting to Twitter. Response code from API request: " +
                 response.getStatusLine().getStatusCode());
     }
@@ -132,7 +136,7 @@ public class Function extends Action {
     }
 
     private static String googleSearchURL(String title) {
-        var googleSearchQuery = String.format("\"%s\" site:packtpub.com -site:subscription.packtpub.com", title);
+        String googleSearchQuery = String.format("\"%s\" site:packtpub.com -site:subscription.packtpub.com", title);
         return String.format("https://google.com/search?q=%s",
                 URLEncoder.encode(googleSearchQuery, StandardCharsets.UTF_8));
     }
