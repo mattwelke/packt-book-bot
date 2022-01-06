@@ -19,6 +19,10 @@ jobs:
         curl -sL https://raw.githubusercontent.com/IBM-Cloud/ibm-cloud-developer-tools/master/linux-installer/idt-installer | bash
     - name: Build and Deploy
       env:
+        # Only present for masking in GHA logs
+        IBM_CLOUD_SERVICE_ID: ${{ secrets.IBM_CLOUD_SERVICE_ID }}
+        IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
+        # Present to be used to call build and deploy script.
         IBM_CLOUD_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
         TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
         TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
