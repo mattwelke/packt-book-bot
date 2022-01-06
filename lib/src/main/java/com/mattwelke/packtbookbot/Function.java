@@ -140,9 +140,4 @@ public class Function extends Action {
         return String.format("https://google.com/search?q=%s",
                 URLEncoder.encode(googleSearchQuery, StandardCharsets.UTF_8));
     }
-
-    public static void main(String[] args) {
-        new Function().invoke(Map.of());
-    }
-
 }
