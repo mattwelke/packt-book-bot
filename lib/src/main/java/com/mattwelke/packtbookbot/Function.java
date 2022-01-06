@@ -94,9 +94,16 @@ public class Function extends Action {
             System.err.println("Error: " + e.getMessage());
         }
 
-        return Map.of("done", (Object) "ye");
+        // Nothing to return to OpenWhisk.
+        return Map.of();
     }
 
+    /**
+     * Given a tweet body, tweets it.
+     * @param tweetBody The tweet body.
+     * @throws URISyntaxException
+     * @throws IOException
+     */
     private void postToTwitter(String tweetBody) throws URISyntaxException, IOException {
         final String json = "application/json";
 
@@ -121,6 +128,12 @@ public class Function extends Action {
                 response.getStatusLine().getStatusCode());
     }
 
+    /**
+     * Given a Packt book title, returns a URL that can be expected to be the product page URL where data such as author(s), publication date, can be found.
+     * @param title The Packt book title.
+     * @return The URL that can be expected to be the product page.
+     * @throws IOException
+     */
     private static String productPageURL(String title) throws IOException {
         Document searchDoc = Jsoup.connect(googleSearchURL(title)).get();
         Elements searchEls = searchDoc.select("h3");
@@ -131,18 +144,17 @@ public class Function extends Action {
                 .findFirst().get();
 
         // Get the link from the search result - parent element is <a>
-        // return titleSearchResult.parent().attr("href");
-        return "https://www.packtpub.com/product/microsoft-365-word-tips-and-tricks/9781800565432";
+        return titleSearchResult.parent().attr("href");
     }
 
+    /**
+     * Given a Packt book title, returns a URL that can be used to perform a Google search for the title where the top result can be expected to be the product page for the title.
+     * @param title The Packt book title.
+     * @return The URL to use to search for the product page.
+     */
     private static String googleSearchURL(String title) {
         String googleSearchQuery = String.format("\"%s\" site:packtpub.com -site:subscription.packtpub.com", title);
         return String.format("https://google.com/search?q=%s",
                 URLEncoder.encode(googleSearchQuery, StandardCharsets.UTF_8));
     }
-
-    public static void main(String[] args) {
-        new Function().invoke(Map.of());
-    }
-
 }
