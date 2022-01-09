@@ -1,5 +1,7 @@
 # packt-book-bot
 
+[![CodeQL](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml)
+
 Twitter bot (https://twitter.com/PacktBookBot) that tweets on a schedule.
 
 ![Screenshot of free eBook of the day tweet](img/free_example.png)
