@@ -18,6 +18,19 @@ Twitter bot (https://twitter.com/PacktBookBot) that tweets on a schedule.
 
 Written using Java 17, deployed to IBM Cloud Functions using the custom Java 17 runtime from https://github.com/ow-extended-runtimes/java-17.
 
+Uses a periodic trigger to begin processing at 12:01am every day. Uses a custom trigger to decouple the data retrieval from use cases for the data. This enables future use cases like sharing the data on GCP BigQuery in a public dataset and with GCP Pub/Sub with a public topic.
+
+### Architecture
+
+Legend:
+
+* Green oval = trigger
+* Blue rounded rectangle = sequence
+* Purple rectangle = action
+* Grey rectangle = potential future action
+
+![architecture diagram](img/architecture.png)
+
 **Why Java?**
 
 * I wanted to practice my Java.
@@ -29,4 +42,3 @@ Written using Java 17, deployed to IBM Cloud Functions using the custom Java 17 
   * This includes invocations.
   * This also includes periodic scheduled events to trigger them ([OpenWhisk alarms](https://github.com/apache/openwhisk-package-alarms/blob/master/provider/lib/cronAlarm.js)).
 * Their FaaS service is powered by the open source FaaS project [Apache OpenWhisk](https://openwhisk.apache.org/)! 
-
