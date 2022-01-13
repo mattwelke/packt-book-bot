@@ -4,5 +4,8 @@
 # Ignore Gradle build output directory
 build
 
-lib/bin/
-lib/build/
+title-fetcher/bin/
+title-fetcher/build/
+
+tweeter/bin/
+tweeter/build/
