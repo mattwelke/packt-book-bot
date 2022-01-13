@@ -1,22 +1,23 @@
 #/bin/bash
 
-# Deploys the function to IBM Cloud Functions using the Java 17 runtime
-# from the extended runtimes project.
-#
-# Script uses command line params instead of env vars, to help with
-# running it locally too, not just with CI/CD.
+# Builds and deploys the tweeter action as an IBM Cloud Functions function using the Java 17
+# runtime from the extended runtimes project. Assumes triggers, sequences, etc
+# that are related to this action have already been created.
+
+# Script uses command line params instead of env vars to help with running it
+# locally too, not just with CI/CD.
 
 REGION="us-south"
 RESOURCE_GROUP="book-bot"
 FUNCTIONS_NAMESPACE="book-bot"
-ACTION_NAME="book-bot"
+ACTION_NAME="tweeter"
 
-BUILD_DIR="lib/build"
-JAR_PATH="lib/build/libs/lib-all.jar"
+BUILD_DIR="tweeter/build"
+JAR_PATH="${BUILD_DIR}/libs/tweeter-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew shadowJar
+./gradlew tweeter:shadowJar
 
 ibmcloud login --apikey $1
 
@@ -26,7 +27,7 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
-  --main "com.mattwelke.packtbookbot.Function" \
+  --main "com.mattwelke.packtbookbot.Tweeter" \
   --docker "owextendedruntimes/java-17:experiment-abstract-class-impl-1634521420" \
   --param twitterConsumerKey $2 \
   --param twitterConsumerSecret $3 \
