@@ -8,4 +8,5 @@
  */
 
 rootProject.name = 'packt-book-bot'
-include('lib')
+include('title-fetcher')
+include('tweeter')
