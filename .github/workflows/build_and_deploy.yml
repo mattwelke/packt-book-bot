@@ -27,7 +27,7 @@ jobs:
         IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
         # Present to be used to call build and deploy script.
         IBM_CLOUD_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-      run: ./scripts/build_and_deploy_title_fetcher.sh
+      run: ./scripts/build_and_deploy_title_fetcher.sh $IBM_CLOUD_API_KEY
     - name: Build and deploy title tweeter action
       env:
         # Only present for masking in GHA logs
