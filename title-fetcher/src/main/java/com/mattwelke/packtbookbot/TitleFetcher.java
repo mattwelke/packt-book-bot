@@ -1,18 +1,13 @@
 package com.mattwelke.packtbookbot;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.owextendedruntimes.actiontest.Action;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
@@ -25,10 +20,6 @@ public class TitleFetcher extends Action {
     // CSS selectors
     private static final String freeBookPageTitleSelector = "h3.product-info__title";
     private static final String freeBookPagePubDateSelector = "div.free_learning__product_pages_date";
-    private static final String productPageAuthorsSelector = ".product-info__author";
-    private static final String productPageDatalistSelector = ".overview__datalist";
-    private static final String productPageDatalistNameSelector = ".datalist__name";
-    private static final String productPageDatalistValueSelector = ".datalist__value";
 
     /**
      * Implementation of action invoke method.
@@ -38,86 +29,78 @@ public class TitleFetcher extends Action {
         try {
             Document freeBookDoc = Jsoup.connect(freeLearningURL).get();
 
-            Elements freeBookPageTitleEls = freeBookDoc.select(freeBookPageTitleSelector);
-            String freeBookTitle = freeBookPageTitleEls.first().text()
-                    .replace("Free eBook - ", "");
+            var title = title(freeBookDoc);
+            var pubDate = pubDate(freeBookDoc);
+            var authors = authors(freeBookDoc);
 
-            Elements freeBookPagePubDateEls = freeBookDoc.select(freeBookPagePubDateSelector);
-            String shortPubDateStr = freeBookPagePubDateEls.first().children().first().html()
-                    .split("Publication date: ")[1];
+            System.out.println(String.format(
+                    "Done parsing free learning page. Title = %s. Publication date = %s. Author(s) = %s.",
+                    title, pubDate, authors));
 
-            System.out.println("Done parsing free learning page. Title is \"" + freeBookTitle + "\".");
+            var titleData = Map.of(
+                    "title", title,
+                    "pubDateMonth", pubDate.month(),
+                    "pubDateYear", pubDate.year(),
+                    "authors", authors);
 
-            String freeBookURL = productPageURL(freeBookTitle, shortPubDateStr);
-
-            Document productPageDoc = Jsoup.connect(freeBookURL).get();
-
-            // Author(s)
-            Element authorsEl = productPageDoc.select(productPageAuthorsSelector).first();
-            String[] authorsArr = authorsEl.html().trim().replace("By ", "")
-                    .replace(" , ", ",").split(",");
-            List<String> authors = Arrays.asList(authorsArr);
-
-            // Publication date
-            Element datalistEl = productPageDoc.select(productPageDatalistSelector).first();
-            String pubDate = datalistEl.children().stream()
-                    .filter((Element el) -> el.select(productPageDatalistNameSelector).html()
-                            .toLowerCase()
-                            .contains("publication date"))
-                    .findFirst().get().select(productPageDatalistValueSelector).html();
-            String[] pubDateSplit = pubDate.split(" ");
-            String pubDateMonth = pubDateSplit[0];
-            String pubDateYear = pubDateSplit[1];
-
-            Map<String, Object> titleData = Map.of(
-                    "title", (Object) freeBookTitle,
-                    "freeBookURL", (Object) freeBookURL,
-                    "authors", (Object) authors,
-                    "pubDateMonth", (Object) pubDateMonth,
-                    "pubDateYear", (Object) pubDateYear);
-
-            System.out.println("Finished obtaining data. Data = " + titleData);
             return titleData;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Error: " + e.getMessage());
+        } catch (Exception ex) {
+            throw new RuntimeException(String.format("Failed to fetch title data (error: %s).", ex.getMessage()), ex);
         }
-
-        // Nothing to return to OpenWhisk.
-        return Map.of();
     }
 
     /**
-     * Given a Packt book title, returns a URL that can be expected to be the
-     * product page URL where data such as author(s), publication date, can be
-     * found.
+     * Given a JSoup document representing the free learning page, parses out the
+     * name of the title on the page.
      * 
-     * @param title      The Packt book title.
-     * @param pubDateStr The publication date of the title in the format "Jan 1970"
-     *                   etc. Used to prevent the wrong title from appearing at the
-     *                   top of the Google search results. This can happen when
-     *                   there are multiple editions of the same title.
-     * @return The URL that can be expected to be the product page.
-     * @throws IOException
+     * @param page The JSoup document for the page.
+     * @return The name of the title.
      */
-    private static String productPageURL(String title, String pubDateStr) throws IOException {
-        // Create Google search URL
-        String googleSearchQuery = String.format("\"%s\" %s site:packtpub.com", title, pubDateStr);
-        String googleSearchURL = String.format("https://google.com/search?q=%s",
-                URLEncoder.encode(googleSearchQuery, StandardCharsets.UTF_8));
+    private static String title(Document page) {
+        Elements freeBookPageTitleEls = page.select(freeBookPageTitleSelector);
+        String freeBookTitle = freeBookPageTitleEls.first().text()
+                .replace("Free eBook - ", "");
+        return freeBookTitle;
+    }
 
-        // Use Google search URL to get a page of search results.
-        Document searchDoc = Jsoup.connect(googleSearchURL).get();
+    /**
+     * Given a JSoup document representing the free learning page, parses out the
+     * publication date (which is broken into month and year) of the title on the
+     * page.
+     * 
+     * @param page The JSoup document for the page.
+     * @return The publication date of the title.
+     */
+    private static PublicationDate pubDate(Document page) {
+        Elements freeBookPagePubDateEls = page.select(freeBookPagePubDateSelector);
+        String shortPubDateStr = freeBookPagePubDateEls.first().children().first().html()
+                .split("Publication date: ")[1];
+        String[] shortPubDateMonthSplit = shortPubDateStr.split(" ");
 
-        // Assume that the top search result is the product page because we made the
-        // search query as strict as possible.
-        Stream<Element> matchingSearchEls = searchDoc.select("h3").stream()
-                .filter((Element res) -> res.html().contains(title));
+        String shortPubDateMonth = shortPubDateMonthSplit[0];
+        String pubDateMonth = shortPubDateMonth.length() == 3
+                ? PublicationDateMonths.monthName(shortPubDateMonth)
+                : shortPubDateMonth;
 
-        Element titleSearchResult = matchingSearchEls.findFirst().get();
+        String pubDateYear = shortPubDateMonthSplit[1];
 
-        // Get the link from the search result - parent element is <a>
-        return titleSearchResult.parent().attr("href");
+        return new PublicationDate(pubDateMonth, pubDateYear);
+    }
+
+    /**
+     * Given a JSoup document representing the free learning page, parses out the
+     * authors of the title on the page.
+     * 
+     * @param page The JSoup document for the page.
+     * @return The authors of the title.
+     */
+    private static List<String> authors(Document page) {
+        String authorsStr = page.select("span.product-info__author").first()
+                .html().trim().split("By ")[1];
+        return Arrays.asList(authorsStr.replace(" ,", ",").replace(", ", ",").split(","));
+    }
+
+    private static record PublicationDate(String month, String year) {
     }
 
     /**

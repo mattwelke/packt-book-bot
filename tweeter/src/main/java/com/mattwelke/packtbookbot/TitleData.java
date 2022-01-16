@@ -3,9 +3,11 @@ package com.mattwelke.packtbookbot;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The data for a title obtainable from the free learning URL.
+ */
 public record TitleData(
         String title,
-        String productPageURL,
         List<String> authors,
         String pubDateMonth,
         String pubDateYear) {
@@ -20,11 +22,6 @@ public record TitleData(
             throw new IllegalArgumentException("missing param \"title\"");
         }
         String title = (String) params.get("title");
-
-        if (!params.containsKey("freeBookURL") || ((String) params.get("freeBookURL")).length() < 1) {
-            throw new IllegalArgumentException("missing param \"freeBookURL\"");
-        }
-        String productPageURL = (String) params.get("freeBookURL");
 
         if (!params.containsKey("authors")) {
             throw new IllegalArgumentException("missing param \"freeBookURL\"");
@@ -49,6 +46,6 @@ public record TitleData(
         }
         String pubDateYear = (String) params.get("pubDateYear");
 
-        return new TitleData(title, productPageURL, authors, pubDateMonth, pubDateYear);
+        return new TitleData(title, authors, pubDateMonth, pubDateYear);
     }
 }
