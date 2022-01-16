@@ -9,3 +9,6 @@ title-fetcher/build/
 
 tweeter/bin/
 tweeter/build/
+
+# IDEs
+.vscode/

@@ -35,35 +35,55 @@ public class Tweeter extends Action {
                     .setSocketTimeout(httpTimeoutSec * 1000).build())
             .build();
 
-    private static final String tweetTemplate = "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook and %s for more info about the title.";
+    private static final String tweetTemplateDetailed = "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook and %s for more info about the title.";
+    private static final String tweetTemplateMinimal = "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook.";
 
     /**
      * Given the title and URL of the product page for the book of the day, Tweets
      * the book of the day.
      */
     @Override
-    public Map<String, Object> invoke(Map<String, Object> params) {
-        try {
-            var data = TitleData.of(params);
+    public Map<String, Object> invoke(Map<String, Object> params) throws RuntimeException {
+        var data = TitleData.of(params);
 
-            String tweet = String.format(
-                    tweetTemplate,
+        String tweet;
+
+        // Use detailed tweet if product page URL fetch succeeds. Otherwise, use minimal
+        // tweet.
+        try {
+            String productPageURL = new ProductPageURLFetcher(data.title(),
+                    String.format("%s %s", data.pubDateMonth(), data.pubDateYear())).fetch();
+
+            System.out.println("Using detailed tweet because product page URL fetch succeeded.");
+
+            tweet = String.format(
+                    tweetTemplateDetailed,
                     data.title(),
                     formatPublicationDate(data),
                     formatAuthors(data),
                     freeLearningURL,
-                    data.productPageURL());
+                    productPageURL);
+        } catch (CouldNotFetchException ex) {
+            System.out.println(
+                    String.format("Falling back to minimal tweet because failed to fetch product page URL (error: %s).",
+                            ex.getMessage()));
 
-            System.out.println("Finished tweet = \"" + tweet + "\".");
-            
-            postToTwitter(tweet, TwitterSecrets.of(params));
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Error: " + e.getMessage());
+            tweet = String.format(
+                    tweetTemplateMinimal,
+                    data.title(),
+                    formatPublicationDate(data),
+                    formatAuthors(data),
+                    freeLearningURL);
         }
 
-        // Nothing to return to OpenWhisk.
-        return Map.of();
+        System.out.println(String.format("Finished tweet = \"%s\".", tweet));
+
+        try {
+            HttpResponse response = postToTwitter(tweet, TwitterSecrets.of(params));
+            return Map.of("tweetResponseStatus", response.getStatusLine());
+        } catch (Exception ex) {
+            throw new RuntimeException(String.format("failed to tweet: %s", ex.getMessage()), ex);
+        }
     }
 
     /**
@@ -102,7 +122,8 @@ public class Tweeter extends Action {
      * @throws URISyntaxException
      * @throws IOException
      */
-    private void postToTwitter(String tweetBody, TwitterSecrets secrets) throws URISyntaxException, IOException {
+    private HttpResponse postToTwitter(String tweetBody, TwitterSecrets secrets)
+            throws URISyntaxException, IOException {
         final String json = "application/json";
 
         HttpPost request = new HttpPost(twitterURL);
@@ -120,10 +141,7 @@ public class Tweeter extends Action {
 
         request.setEntity(new StringEntity("{\"text\":\"" + tweetBody + "\"}"));
 
-        HttpResponse response = httpClient.execute(request);
-
-        System.out.println("Finished posting to Twitter. Response code from API request: " +
-                response.getStatusLine().getStatusCode());
+        return httpClient.execute(request);
     }
 
     /**
@@ -132,7 +150,13 @@ public class Tweeter extends Action {
      * @param args
      */
     public static void main(String[] args) {
+        // Test of a title that has been known to fail the fetch product page URL step
+        // before.
         new Tweeter().invoke(Map.of(
+                "title", "Hands-On Software Engineering with Python",
+                "pubDateMonth", "October",
+                "pubDateYear", "2018",
+                "authors", List.of("Brian Allbee"),
                 "consumerKey", (Object) System.getenv("TWITTER_CONSUMER_KEY"),
                 "consumerSecret", (Object) System.getenv("TWITTER_CONSUMER_SECRET"),
                 "token", (Object) System.getenv("TWITTER_TOKEN"),
