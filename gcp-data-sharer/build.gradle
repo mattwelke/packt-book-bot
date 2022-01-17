@@ -10,10 +10,9 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-    // https://mvnrepository.com/artifact/org.jsoup/jsoup
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'   
+    // https://github.com/googleapis/java-bigquery
+    implementation platform('com.google.cloud:libraries-bom:24.2.0')
+    implementation 'com.google.cloud:google-cloud-bigquery'
 }
 
 java {

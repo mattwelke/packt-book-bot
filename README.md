@@ -2,39 +2,75 @@
 
 [![CodeQL](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml)
 
-Twitter bot (https://twitter.com/PacktBookBot) that tweets on a schedule.
+Bot that tweets to Twitter (https://twitter.com/PacktBookBot) and logs data in BigQuery on GCP on a schedule.
 
-![Screenshot of free eBook of the day tweet](img/free_example.png)
+## Features
 
-## Current features
+### Free eBook of the day - every day at 12:01am UTC
+  
+#### Tweeted from Twitter bot
 
-- Free eBook of the day - every day at 12:01am UTC
+![Screenshot of free eBook of the day tweet](img/tweet_example.png)
 
-## Future features
+#### Logged in a public BigQuery table on GCP (Google Cloud Platform)
 
-- Monitoring for new titles, posting them as they are released (only if Packt Twitter handle doesn't do this already)
+```sql
+SELECT * FROM `packt-book-bot.public_data.free_ebook_of_the_day`
+ORDER BY inserted_at DESC
+```
 
-## Tech stack
+![screenshot of BigQuery results](img/bigquery_results.png)
 
-Written using Java 17, deployed to IBM Cloud Functions using the custom Java 17 runtime from https://github.com/ow-extended-runtimes/java-17.
+Any user authenticated to GCP is able to view this table's schema and query it because of its dataset's IAM configuration:
 
-Uses a periodic trigger to begin processing at 12:01am every day. Uses a custom trigger to decouple the data retrieval from use cases for the data. This enables future use cases like sharing the data on GCP BigQuery in a public dataset and with GCP Pub/Sub with a public topic.
+![Screenshot of BigQuery dataset IAM](img/bigquery_iam.png)
 
-### Architecture
+## Tech stack & architecture
+
+Written using Java 16, deployed to IBM Cloud Functions using the custom Java 17 runtime from https://github.com/ow-extended-runtimes/java-17.
+
+Uses a periodic trigger to begin processing at 12:01am every day. Uses a custom trigger to decouple the data retrieval from use cases for the data. This enables multiple use cases for the fetched data such as tweeting from a Twitter bot and building a public BigQuery dataset on GCP. In the future, this might include publishing to a GCP Pub/Sub topic too.
+
+Separate OpenWhisk actions run to accomplish each use case:
+
+### title fetcher
+
+Java action that scrapes the packtpub.com site to get which title is the free eBook of the day, as well additional info useful for logging, like publication date and author(s).
+
+Source code located in `title-fetcher` directory.
+
+### free ebook of the day invoker
+
+*note: not present in repo*
+
+Simple JavaScript action based on README in https://github.com/apache/openwhisk-client-js. 
+Serves as "glue" to trigger a custom event representing an eBook of the day being released. Used in an OpenWhisk sequence with the title fetcher action.
+
+This exists in the architecture as a separate action only because there is no official Java client for OpenWhisk right now. If a Java client existed, it would be simpler to not have this action (and therefore, not have a sequence containing this action and the title fetcher action) and just have the title fetcher action trigger the event after fetching the title data.
+
+### tweeter
+
+Java action that, upon a free eBook of the day being released, tweets a message about the title. It attempts to obtain the product page URL (ex. https://www.packtpub.com/product/learn-pfsense-2-4/9781789343113) before creating the Tweet by performing more web scraping because including the product page URL in the tweet body results in Twitter rendering a nicer-looking Tweet with an image preview. If this additional web scraping fails, it falls back to a minimal tweet body formed from just the title data from the event, and links the tweet reader to the static URL of the free learning page (https://www.packtpub.com/free-learning).
+
+### GCP data sharer
+
+Java action that, upon a free eBook of the day being released, uses the BigQuery streaming API to insert a row into a BigQuery table in a public dataset. It does attempt to perform additional web scraping. It inserts only the data from the event into BigQuery.
+
+### Diagram
 
 Legend:
 
 * Green oval = trigger
 * Blue rounded rectangle = sequence
 * Purple rectangle = action
-* Grey rectangle = potential future action
 
 ![architecture diagram](img/architecture.png)
 
-**Why Java?**
+**Why Java 16?**
 
-* I wanted to practice my Java.
-* For this use case, slow startup speed (about half a second in this case) is good enough for the use case.
+* Not another supported OpenWhisk programming langauge because I prefer working with compiled programming languages and wanted to practice my Java.
+* Not Java 17, despite deploying to a Java 17 runtime, because GitHub's CodeQL only works with up to Java 16 right now.
+* Even though Java has a relatively slow startup speed compared to other supported OpenWhisk programming languages, this is not interactive code. Users aren't waiting on it. A few extra seconds doesn't matter.
 
 **Why IBM Cloud?**
 
@@ -42,3 +78,17 @@ Legend:
   * This includes invocations.
   * This also includes periodic scheduled events to trigger them ([OpenWhisk alarms](https://github.com/apache/openwhisk-package-alarms/blob/master/provider/lib/cronAlarm.js)).
 * Their FaaS service is powered by the open source FaaS project [Apache OpenWhisk](https://openwhisk.apache.org/)! 
+
+**Why BigQuery?**
+
+* Good for both huge and tiny datasets. Tiny datasets fit within their free tier.
+* Easy to share data publicly via GCP IAM for BigQuery (https://cloud.google.com/bigquery/public-data).
+
+**Why multi cloud?**
+
+Using the best tool for the job.
+
+* IBM Cloud has a better free tier for event based FaaS (GCP's Cloud Scheduler has a max number of jobs in the free tier).
+* Google Cloud has a better free tier for exposing data publicly so that it can be queried with SQL.
+  * IBM Cloud has SQL Query which is similar to GCP's BigQuery in that you can query data with SQL, including public data, but it charges based on the number of cloud object storage object reads. This would add up quickly for this use case. BigQuery only charges per data scanned, which is better for this use case.
+  * People who want to use this data are more likely to be familiar with GCP than IBM Cloud.
