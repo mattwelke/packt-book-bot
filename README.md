@@ -41,20 +41,45 @@ Source code located in `title-fetcher` directory.
 
 ### free ebook of the day invoker
 
-*note: not present in repo*
-
 Simple JavaScript action based on README in https://github.com/apache/openwhisk-client-js. 
 Serves as "glue" to trigger a custom event representing an eBook of the day being released. Used in an OpenWhisk sequence with the title fetcher action.
 
 This exists in the architecture as a separate action only because there is no official Java client for OpenWhisk right now. If a Java client existed, it would be simpler to not have this action (and therefore, not have a sequence containing this action and the title fetcher action) and just have the title fetcher action trigger the event after fetching the title data.
 
+Source code, which is not present in this repo:
+
+```javascript
+var openwhisk = require('openwhisk');
+
+async function main(params) {
+    const triggerName = 'free-ebook-of-the-day-released';
+    
+    try {
+        var ow = openwhisk();
+        const triggerResult = await ow.triggers.invoke({
+            name: triggerName,
+            params,
+        });
+        console.info(`invoked trigger "${triggerName}"`, triggerResult);
+        return {};
+    } catch (err) {
+        console.error(`failed to invoke trigger "${triggerName}"`, err);
+        return {};
+    }
+}
+```
+
 ### tweeter
 
 Java action that, upon a free eBook of the day being released, tweets a message about the title. It attempts to obtain the product page URL (ex. https://www.packtpub.com/product/learn-pfsense-2-4/9781789343113) before creating the Tweet by performing more web scraping because including the product page URL in the tweet body results in Twitter rendering a nicer-looking Tweet with an image preview. If this additional web scraping fails, it falls back to a minimal tweet body formed from just the title data from the event, and links the tweet reader to the static URL of the free learning page (https://www.packtpub.com/free-learning).
 
+Source code located in `tweeter` directory.
+
 ### GCP data sharer
 
-Java action that, upon a free eBook of the day being released, uses the BigQuery streaming API to insert a row into a BigQuery table in a public dataset. It does attempt to perform additional web scraping. It inserts only the data from the event into BigQuery.
+Java action that, upon a free eBook of the day being released, uses the BigQuery streaming API to insert a row into a BigQuery table in a public dataset. It does not attempt to perform additional web scraping. It inserts only the data from the event into BigQuery.
+
+Source code located in `gcp-data-sharer` directory.
 
 ### Diagram
 
