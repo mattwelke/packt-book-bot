@@ -4,6 +4,9 @@
 # Ignore Gradle build output directory
 build
 
+gcp-data-sharer/bin/
+gcp-data-sharer/build/
+
 title-fetcher/bin/
 title-fetcher/build/
 
