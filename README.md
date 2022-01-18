@@ -2,7 +2,7 @@
 
 [![CodeQL](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml)
 
-Bot that tweets to Twitter (https://twitter.com/PacktBookBot) and logs data in BigQuery on GCP on a schedule.
+Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook of the day in BigQuery daily.
 
 ## Features
 
@@ -16,7 +16,7 @@ Bot that tweets to Twitter (https://twitter.com/PacktBookBot) and logs data in B
 
 ```sql
 SELECT * FROM `packt-book-bot.public_data.free_ebook_of_the_day`
-ORDER BY inserted_at DESC
+ORDER BY day DESC
 ```
 
 ![screenshot of BigQuery results](img/bigquery_results.png)
@@ -91,11 +91,14 @@ Legend:
 
 ![architecture diagram](img/architecture.png)
 
+**Why Java?**
+
+* I prefer working with compiled programming langauges and I wanted to practice my Java.
+* Despite starting up slower than other programming languages supported by OpenWhisk, because this use case is for background processing (no user waits for it to complete), this isn't an issue.
+
 **Why Java 16?**
 
-* Not another supported OpenWhisk programming langauge because I prefer working with compiled programming languages and wanted to practice my Java.
-* Not Java 17, despite deploying to a Java 17 runtime, because GitHub's CodeQL only works with up to Java 16 right now.
-* Even though Java has a relatively slow startup speed compared to other supported OpenWhisk programming languages, this is not interactive code. Users aren't waiting on it. A few extra seconds doesn't matter.
+Despite deploying to a Java 17 runtime, because GitHub's CodeQL only works with up to Java 16 right now, the action code is Java 16.
 
 **Why IBM Cloud?**
 
