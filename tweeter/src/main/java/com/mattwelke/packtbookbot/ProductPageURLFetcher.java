@@ -63,7 +63,13 @@ public class ProductPageURLFetcher {
             Element titleH3Parent = titleH3.parent();
 
             // Get the link from the search result - parent element is <a>
-            return titleH3Parent.attr("href");
+            String hrefValue = titleH3Parent.attr("href");
+
+            if (hrefValue.equals("")) {
+                throw new IllegalArgumentException("href value on Google search results page was an empty string");
+            }
+
+            return hrefValue;
         } catch (Exception ex) {
             throw new CouldNotFetchException(
                     String.format("failed to fetch product page URL for title %s: %s", title, ex.getMessage()), ex);

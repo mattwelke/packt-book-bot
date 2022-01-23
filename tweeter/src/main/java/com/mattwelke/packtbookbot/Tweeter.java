@@ -64,9 +64,8 @@ public class Tweeter extends Action {
                     freeLearningURL,
                     productPageURL);
         } catch (CouldNotFetchException ex) {
-            System.out.println(
-                    String.format("Falling back to minimal tweet because failed to fetch product page URL (error: %s).",
-                            ex.getMessage()));
+            System.out.printf("Falling back to minimal tweet because failed to fetch product page URL (error: %s).%n",
+                    ex.getMessage());
 
             tweet = String.format(
                     tweetTemplateMinimal,
@@ -76,7 +75,7 @@ public class Tweeter extends Action {
                     freeLearningURL);
         }
 
-        System.out.println(String.format("Finished tweet = \"%s\".", tweet));
+        System.out.printf("Finished tweet = \"%s\".%n", tweet);
 
         try {
             HttpResponse response = postToTwitter(tweet, TwitterSecrets.of(params));
@@ -123,7 +122,7 @@ public class Tweeter extends Action {
      * @throws IOException
      */
     private HttpResponse postToTwitter(String tweetBody, TwitterSecrets secrets)
-            throws URISyntaxException, IOException {
+            throws IOException {
         final String json = "application/json";
 
         HttpPost request = new HttpPost(twitterURL);
@@ -153,13 +152,13 @@ public class Tweeter extends Action {
         // Test of a title that has been known to fail the fetch product page URL step
         // before.
         new Tweeter().invoke(Map.of(
-                "title", "Hands-On Software Engineering with Python",
-                "pubDateMonth", "October",
-                "pubDateYear", "2018",
-                "authors", List.of("Brian Allbee"),
-                "consumerKey", (Object) System.getenv("TWITTER_CONSUMER_KEY"),
-                "consumerSecret", (Object) System.getenv("TWITTER_CONSUMER_SECRET"),
-                "token", (Object) System.getenv("TWITTER_TOKEN"),
-                "tokenSecret", (Object) System.getenv("TWITTER_TOKEN_SECRET")));
+                "title", "Mastering Microsoft Dynamics 365 Customer Engagement - Second Edition",
+                "pubDateMonth", "February",
+                "pubDateYear", "2019",
+                "authors", List.of("Deepesh Somani"),
+                "twitterConsumerKey", System.getenv("TWITTER_CONSUMER_KEY"),
+                "twitterConsumerSecret", System.getenv("TWITTER_CONSUMER_SECRET"),
+                "twitterToken", System.getenv("TWITTER_TOKEN"),
+                "twitterTokenSecret", System.getenv("TWITTER_TOKEN_SECRET")));
     }
 }
