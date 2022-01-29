@@ -14,7 +14,7 @@ import org.jsoup.select.Elements;
  * Responsible for trying to fetch the product page URL given a title. Used to
  * get more data for the tweet if possible so that it renders nicer.
  */
-public class ProductPageURLFetcher {
+public class ProductPageUrlFetcher {
     private String title;
     private String pubDateMonth;
     private String pubDateYear;
@@ -28,7 +28,7 @@ public class ProductPageURLFetcher {
      *                   top of the Google search results. This can happen when
      *                   there are multiple editions of the same title.
      */
-    public ProductPageURLFetcher(String title, String pubDateStr) {
+    public ProductPageUrlFetcher(String title, String pubDateStr) {
         this.title = title;
 
         String[] pubDateStrSplit = pubDateStr.split(" ");
