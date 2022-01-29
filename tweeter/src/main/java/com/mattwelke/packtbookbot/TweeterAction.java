@@ -1,12 +1,11 @@
 package com.mattwelke.packtbookbot;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.owextendedruntimes.actiontest.Action;
+import com.owextendedruntimes.actions.Action;
 import com.stackoverflow.smile.TwitterOauthHeaderGenerator;
 
 import org.apache.http.HttpHeaders;
@@ -17,12 +16,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import static com.mattwelke.packtbookbot.Urls.FREE_LEARNING;
+
 /**
  * Given data about the Packt free book of the day, tweets it using the Packt
  * Book Bot Twitter account.
  */
-public class Tweeter extends Action {
-    private static final String freeLearningURL = "https://www.packtpub.com/free-learning";
+public class TweeterAction extends Action {
     private static final String twitterURL = "https://api.twitter.com/2/tweets";
 
     // HTTP client settings for web scraping
@@ -48,31 +48,24 @@ public class Tweeter extends Action {
 
         String tweet;
 
-        // Use detailed tweet if product page URL fetch succeeds. Otherwise, use minimal
-        // tweet.
-        try {
-            String productPageURL = new ProductPageURLFetcher(data.title(),
-                    String.format("%s %s", data.pubDateMonth(), data.pubDateYear())).fetch();
-
-            System.out.println("Using detailed tweet because product page URL fetch succeeded.");
-
+        // Use detailed tweet if product page URL is available. Otherwise, use minimal tweet.
+        if (data.productPageUrl().isPresent()) {
+            System.out.println("Using detailed tweet because product page URL was available.");
             tweet = String.format(
                     tweetTemplateDetailed,
                     data.title(),
                     formatPublicationDate(data),
                     formatAuthors(data),
-                    freeLearningURL,
-                    productPageURL);
-        } catch (CouldNotFetchException ex) {
-            System.out.printf("Falling back to minimal tweet because failed to fetch product page URL (error: %s).%n",
-                    ex.getMessage());
-
+                    FREE_LEARNING,
+                    data.productPageUrl().get());
+        } else {
+            System.out.println("Falling back to minimal tweet because product page URL was not available");
             tweet = String.format(
                     tweetTemplateMinimal,
                     data.title(),
                     formatPublicationDate(data),
                     formatAuthors(data),
-                    freeLearningURL);
+                    FREE_LEARNING);
         }
 
         System.out.printf("Finished tweet = \"%s\".%n", tweet);
@@ -88,12 +81,12 @@ public class Tweeter extends Action {
     /**
      * Given title data, from the list of author(s) for the title, creates a
      * formatted string suitable for display in a tweet.
-     * 
+     *
      * @param data The title data.
      * @return The formatted author(s) string.
      */
     private String formatAuthors(TitleData data) {
-        List<String> authors = data.authors();
+        List<String> authors = data.authors().names();
 
         if (authors.size() == 1) {
             return String.format("Author: %s", authors.get(0));
@@ -105,7 +98,7 @@ public class Tweeter extends Action {
     /**
      * Given title data, from the publication date component strings, creates a
      * formatted string suitable for display in a tweet.
-     * 
+     *
      * @param data The title data.
      * @return The formatted publication date string.
      */
@@ -115,11 +108,10 @@ public class Tweeter extends Action {
 
     /**
      * Given a tweet and secrets for the Twitter API, tweets the tweet.
-     * 
+     *
      * @param tweetBody The tweet to be tweeted.
      * @param secrets   The secrets.
-     * @throws URISyntaxException
-     * @throws IOException
+     * @throws IOException when the HTTP request to Twitter fails.
      */
     private HttpResponse postToTwitter(String tweetBody, TwitterSecrets secrets)
             throws IOException {
@@ -133,7 +125,7 @@ public class Tweeter extends Action {
                 secrets.token(),
                 secrets.tokenSecret());
 
-        String header = headerGenerator.generateHeader("POST", twitterURL, new HashMap<String, String>());
+        String header = headerGenerator.generateHeader("POST", twitterURL, new HashMap<>());
 
         request.addHeader(HttpHeaders.AUTHORIZATION, header);
         request.addHeader(HttpHeaders.CONTENT_TYPE, json);
@@ -145,13 +137,13 @@ public class Tweeter extends Action {
 
     /**
      * For local testing.
-     * 
-     * @param args
+     *
+     * @param args args
      */
     public static void main(String[] args) {
         // Test of a title that has been known to fail the fetch product page URL step
         // before.
-        new Tweeter().invoke(Map.of(
+        new TweeterAction().invoke(Map.of(
                 "title", "Mastering Microsoft Dynamics 365 Customer Engagement - Second Edition",
                 "pubDateMonth", "February",
                 "pubDateYear", "2019",

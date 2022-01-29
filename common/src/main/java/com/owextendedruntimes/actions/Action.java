@@ -1,4 +1,4 @@
-package com.owextendedruntimes.actiontest;
+package com.owextendedruntimes.actions;
 
 import java.util.Map;
 

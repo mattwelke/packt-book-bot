@@ -24,7 +24,7 @@ import com.owextendedruntimes.actiontest.Action;
  * writing it to Google Cloud Platform. Right now, that means inserting a row
  * into a BigQuery table in a public BigQuery dataset.
  */
-public class GcpDataSharer extends Action {
+public class GcpDataSharerAction extends Action {
     private static final String datasetName = "public_data";
     private static final String tableName = "free_ebook_of_the_day";
 
@@ -93,7 +93,7 @@ public class GcpDataSharer extends Action {
         rowContent.put("publication_date", String.format("%s-%s-01",
                 data.pubDateYear(), PublicationDateMonths.monthNumber(data.pubDateMonth())));
 
-        rowContent.put("authors", data.authors());
+        rowContent.put("authors", data.authors().names());
 
         rowContent.put("inserted_at", Instant.now().toString());
 
@@ -106,7 +106,7 @@ public class GcpDataSharer extends Action {
      * @param args
      */
     public static void main(String[] args) {
-        new GcpDataSharer().invoke(Map.of(
+        new GcpDataSharerAction().invoke(Map.of(
                 "title", "Hands-On Software Engineering with Python",
                 "pubDateMonth", "October",
                 "pubDateYear", "2018",

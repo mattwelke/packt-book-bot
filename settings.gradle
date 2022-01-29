@@ -1,4 +1,7 @@
 rootProject.name = 'packt-book-bot'
+include('common')
 include('gcp-data-sharer')
 include('title-fetcher')
 include('tweeter')
+
+

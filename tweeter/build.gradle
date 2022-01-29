@@ -10,10 +10,12 @@ repositories {
 }
 
 dependencies {
+    implementation project(':common')
+
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'   
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'
 }
 
 java {
