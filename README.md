@@ -15,7 +15,8 @@ Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook
 #### Logged in a public BigQuery table on GCP (Google Cloud Platform)
 
 ```sql
-SELECT * FROM `packt-book-bot.public_data.free_ebook_of_the_day`
+SELECT day, title, authors_v2 AS authors
+FROM `packt-book-bot.public_data.free_ebook_of_the_day`
 ORDER BY day DESC
 ```
 
