@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.owextendedruntimes.actions.Action;
+import com.owextendedruntimes.actiontest.Action;
 import com.stackoverflow.smile.TwitterOauthHeaderGenerator;
 
 import org.apache.http.HttpHeaders;

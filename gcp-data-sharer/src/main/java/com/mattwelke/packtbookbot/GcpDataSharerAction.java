@@ -55,10 +55,10 @@ public class GcpDataSharerAction extends Action {
 
     /**
      * Given a params map, returns an authenticated BigQuery client.
-     * 
+     *
      * @param params The params map from the action invocation.
      * @return A BigQuery client build from credentials in the params map.
-     * @throws IOException
+     * @throws IOException when it fails to load GCP credentials from the provided params map.
      */
     private static BigQuery bigqueryClient(Map<String, Object> params) throws IOException {
         if (!params.containsKey("gcpCreds") || ((String) params.get("gcpCreds")).length() < 1) {
@@ -77,11 +77,13 @@ public class GcpDataSharerAction extends Action {
 
     /**
      * Given title data, returns a row to insert into BigQuery.
-     * 
+     *
      * @param data The title data.
      * @return The row to insert.
      */
     private static Map<String, Object> row(TitleData data) {
+        Authors authors = data.authors();
+
         Map<String, Object> rowContent = new HashMap<>();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -93,17 +95,20 @@ public class GcpDataSharerAction extends Action {
         rowContent.put("publication_date", String.format("%s-%s-01",
                 data.pubDateYear(), PublicationDateMonths.monthNumber(data.pubDateMonth())));
 
-        rowContent.put("authors", data.authors().names());
+        // TODO: Deprecate this field because we have the new authors_v2 field.
+        rowContent.put("authors", authors.names());
 
         rowContent.put("inserted_at", Instant.now().toString());
+
+        rowContent.put("authors_v2", Map.of(
+                "names", authors.names(),
+                "all_present", !authors.more()));
 
         return rowContent;
     }
 
     /**
      * For local testing.
-     * 
-     * @param args
      */
     public static void main(String[] args) {
         new GcpDataSharerAction().invoke(Map.of(
@@ -111,6 +116,6 @@ public class GcpDataSharerAction extends Action {
                 "pubDateMonth", "October",
                 "pubDateYear", "2018",
                 "authors", List.of("Brian Allbee"),
-                "gcpCreds", (Object) System.getenv("GCP_CREDS")));
+                "gcpCreds", System.getenv("GCP_CREDS")));
     }
 }
