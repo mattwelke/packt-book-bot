@@ -1,6 +1,7 @@
 # packt-book-bot
 
 [![CodeQL](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/mattwelke/packt-book-bot/actions/workflows/codeql-analysis.yml)
+[![Build and deploy to ICF](https://github.com/mattwelke/packt-book-bot/actions/workflows/build_and_deploy.yml/badge.svg)](https://github.com/mattwelke/packt-book-bot/actions/workflows/build_and_deploy.yml)
 
 Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook of the day in BigQuery daily.
 

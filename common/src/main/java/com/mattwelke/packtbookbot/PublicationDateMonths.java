@@ -7,7 +7,7 @@ public class PublicationDateMonths {
     /**
      * Given a month's short month name used on the Packt website, returns the full
      * month name.
-     * 
+     *
      * @param shortMonthName The short month name.
      * @return The full month name for the month.
      */
@@ -32,7 +32,7 @@ public class PublicationDateMonths {
     /**
      * Given a month's full month name, returns a two-digit string representing the
      * number of the month.
-     *
+     * <p>
      * Example: September -> "09"
      *
      * @param fullMonthName The full month name.
