@@ -77,7 +77,7 @@ Source code located in `tweeter` directory.
 
 ### GCP data sharer
 
-Java action that, upon a free eBook of the day being released, uses the BigQuery streaming API to insert a row into a BigQuery table in a public dataset. It does not attempt to perform additional web scraping. It inserts only the data from the event into BigQuery.
+Java action that, upon a free eBook of the day being released, uses the BigQuery streaming API to insert a row into a BigQuery table in a public dataset.
 
 Source code located in `gcp-data-sharer` directory.
 
