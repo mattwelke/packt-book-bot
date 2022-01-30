@@ -79,20 +79,21 @@ public class FreeLearningPageDataFetcher {
      */
     @SuppressWarnings("GrazieInspection")
     static Authors parseAuthorsString(String authorsStr) {
-        List<String> authorNames = new ArrayList<>(Arrays.asList(authorsStr.replace(" ,", ",")
-                .replace(", ", ",").split(",")));
+        List<String> authorNames = new ArrayList<>(new ArrayList<>(Arrays.asList(authorsStr.replace(" ,", ",")
+                .replace(", ", ",").split(","))).stream()
+                .map(String::trim).toList());
 
         String lastAuthorName = authorNames.get(authorNames.size() - 1);
 
-        boolean more = lastAuthorName.contains("and");
+        boolean more = lastAuthorName.contains("and "); // the trim before this means we can do this
 
         if (more) {
             // Sanitize final author name
             authorNames.remove(authorNames.size() - 1);
             lastAuthorName = lastAuthorName.split("and")[0];
-            authorNames.add(lastAuthorName);
+            authorNames.add(lastAuthorName.trim());
         }
 
-        return new Authors(authorNames.stream().map(String::trim).collect(Collectors.toList()), more);
+        return new Authors(authorNames, more);
     }
 }

@@ -93,7 +93,7 @@ public class GcpDataSharerAction extends Action {
         rowContent.put("title", data.title());
 
         rowContent.put("publication_date", String.format("%s-%s-01",
-                data.pubDateYear(), PublicationDateMonths.monthNumber(data.pubDateMonth())));
+                data.pubDate().year(), PublicationDateMonths.monthNumber(data.pubDate().month())));
 
         // TODO: Deprecate this field because we have the new authors_v2 field.
         rowContent.put("authors", authors.names());

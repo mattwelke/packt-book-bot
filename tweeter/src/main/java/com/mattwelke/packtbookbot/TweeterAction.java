@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.owextendedruntimes.actiontest.Action;
 import com.stackoverflow.smile.TwitterOauthHeaderGenerator;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
@@ -38,19 +41,19 @@ public class TweeterAction extends Action {
     private static final String tweetTemplateDetailed = "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook and %s for more info about the title.";
     private static final String tweetTemplateMinimal = "%s (%s, %s) is the free eBook of the day from Packt!\\n\\nVisit %s to claim the eBook.";
 
+    private final Logger logger = Logger.getLogger(TweeterAction.class.getName());
+
     /**
      * Given the title and URL of the product page for the book of the day, Tweets
      * the book of the day.
      */
     @Override
     public Map<String, Object> invoke(Map<String, Object> params) throws RuntimeException {
-        var data = TitleData.of(params);
-
+        TitleData data = TitleData.of(params);
         String tweet;
 
-        // Use detailed tweet if product page URL is available. Otherwise, use minimal tweet.
         if (data.productPageUrl().isPresent()) {
-            System.out.println("Using detailed tweet because product page URL was available.");
+            logger.log(Level.INFO, "Using detailed tweet because product page URL was available.");
             tweet = String.format(
                     tweetTemplateDetailed,
                     data.title(),
@@ -59,7 +62,7 @@ public class TweeterAction extends Action {
                     FREE_LEARNING,
                     data.productPageUrl().get());
         } else {
-            System.out.println("Falling back to minimal tweet because product page URL was not available");
+            logger.log(Level.INFO,"Falling back to minimal tweet because product page URL was not available");
             tweet = String.format(
                     tweetTemplateMinimal,
                     data.title(),
@@ -68,13 +71,15 @@ public class TweeterAction extends Action {
                     FREE_LEARNING);
         }
 
-        System.out.printf("Finished tweet = \"%s\".%n", tweet);
+        logger.log(Level.INFO, "Finished tweet = \"{}\".", tweet);
 
         try {
             HttpResponse response = postToTwitter(tweet, TwitterSecrets.of(params));
-            return Map.of("tweetResponseStatus", response.getStatusLine());
+            String twitterResponseStatus = response.getStatusLine().toString();
+            logger.log(Level.INFO, "Tweeted. Response status from Twitter: {}.", twitterResponseStatus);
+            return Map.of("tweetResponseStatus", twitterResponseStatus);
         } catch (Exception ex) {
-            throw new RuntimeException(String.format("failed to tweet: %s", ex.getMessage()), ex);
+            throw new RuntimeException("Could not tweet.", ex);
         }
     }
 
@@ -103,7 +108,7 @@ public class TweeterAction extends Action {
      * @return The formatted publication date string.
      */
     private String formatPublicationDate(TitleData data) {
-        return String.format("%s %s", data.pubDateMonth(), data.pubDateYear());
+        return String.format("%s %s", data.pubDate().month(), data.pubDate().year());
     }
 
     /**

@@ -21,7 +21,7 @@ public class ProductPageUrlFetcher {
 
     /**
      * Creates a new fetcher.
-     * 
+     *
      * @param title      The Packt book title.
      * @param pubDateStr The publication date of the title in the format "Jan 1970"
      *                   etc. Used to prevent the wrong title from appearing at the
@@ -40,8 +40,9 @@ public class ProductPageUrlFetcher {
      * Given a Packt book title, returns a URL that can be expected to be the
      * product page URL where data such as author(s), publication date, can be
      * found.
-     * 
-     * @throws CouldNotFetchException
+     *
+     * @throws CouldNotFetchException when it encounters any issue parsing HTML that prevents it from fetching the
+     *                                product page URL.
      */
     public String fetch() throws CouldNotFetchException {
         try {
@@ -54,22 +55,41 @@ public class ProductPageUrlFetcher {
             // Use Google search URL to get a page of search results.
             Document searchDoc = Jsoup.connect(googleSearchURL).get();
 
-            // Assume that the top search result is the product page because we made the
-            // search query as strict as possible.
-            Elements h3s = searchDoc.select("h3");
-            Stream<Element> h3sWithTitle = h3s.stream().filter((Element res) -> res.html().contains(title));
-            Optional<Element> firstH3WithTitle = h3sWithTitle.findFirst();
+            // Sometimes, the book in the Google search results doesn't have the "- nth Edition"
+            // suffix, but we still want that result to be chosen. We trust that because we included
+            // the publication month and day in the search query, the first result that matches will be
+            // the edition intended, even if multiple editions of the book have been published.
+            String titleForH3Match = title.replaceAll("(?i)- (Second|Third|Fourth|Fifth|Sixth) Edition", "");
+
+            // Include only the h3s with the title, but exclude ones with "Images for" because
+            // sometimes an h3 with that will come up before the actual search result links.
+            Optional<Element> firstH3WithTitle = searchDoc.select("h3").stream()
+                    .filter(e -> !e.text().toLowerCase().contains("images for"))
+                    .filter(e -> e.html().contains(titleForH3Match))
+                    .findFirst();
+
+            if (firstH3WithTitle.isEmpty()) {
+                throw new CouldNotFetchException("Google search results page did not have a usable h3 with the book's title.");
+            }
+
             Element titleH3 = firstH3WithTitle.get();
+
+            if (titleH3.parent() == null) {
+                throw new CouldNotFetchException("Chosen h3 on Google search results page did not have a parent element.");
+            }
+
             Element titleH3Parent = titleH3.parent();
 
             // Get the link from the search result - parent element is <a>
             String hrefValue = titleH3Parent.attr("href");
 
             if (hrefValue.equals("")) {
-                throw new IllegalArgumentException("href value on Google search results page was an empty string");
+                throw new CouldNotFetchException("href value on parent element of chosen h3 on Google search results page was an empty string.");
             }
 
             return hrefValue;
+        } catch (CouldNotFetchException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new CouldNotFetchException(
                     String.format("failed to fetch product page URL for title %s: %s", title, ex.getMessage()), ex);

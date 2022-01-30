@@ -1,25 +1,28 @@
 package com.mattwelke.packtbookbot;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * The data for a title obtainable from the free learning URL.
+ * The data for a title obtainable from the free learning URL. Used between actions, but the Java 17
+ * runtime doesn't support serializing and deserializing java.util.Optional<T> and records, so we need
+ * to manually serialize it to and deserialize it from strings and booleans.
  */
 public record TitleData(
         String title,
-        String pubDateMonth,
-        String pubDateYear,
+        PublicationDate pubDate,
         Optional<String> productPageUrl,
         Authors authors) {
     /**
      * Creates a record from an OpenWhisk action params map.
-     * 
+     *
      * @param params Params map.
      * @return The record.
      */
     static TitleData of(Map<String, Object> params) throws IllegalArgumentException {
+        // title
         if (!params.containsKey("title")) {
             throw new IllegalArgumentException("missing param \"title\"");
         }
@@ -28,6 +31,7 @@ public record TitleData(
             throw new IllegalArgumentException("param \"title\" must be at least one character long");
         }
 
+        // pub date
         if (!params.containsKey("pubDateMonth")) {
             throw new IllegalArgumentException("missing param \"pubDateMonth\"");
         }
@@ -35,7 +39,6 @@ public record TitleData(
         if (pubDateMonth.length() < 1) {
             throw new IllegalArgumentException("param \"pubDateMonth\" must be at least one character long");
         }
-
         if (!params.containsKey("pubDateYear")) {
             throw new IllegalArgumentException("missing param \"pubDateYear\"");
         }
@@ -43,29 +46,57 @@ public record TitleData(
         if (pubDateYear.length() < 1) {
             throw new IllegalArgumentException("param \"pubDateYear\" must be at least one character long");
         }
+        PublicationDate pubDate = new PublicationDate(pubDateMonth, pubDateYear);
 
-        if (!params.containsKey("productPageUrl")) {
-            throw new IllegalArgumentException("missing param \"productPageUrl\"");
+        // product page URL
+        if (!params.containsKey("hasProductPageUrl")) {
+            throw new IllegalArgumentException("missing param \"hasProductPageUrl\"");
         }
-        // TODO: Learn what warning about unchecked cast means
-        Optional<String> productPageUrl = (Optional<String>) params.get("productPageUrl");
-        if (productPageUrl.isPresent() && productPageUrl.get().length() < 1) {
-            throw new IllegalArgumentException("param \"productPageUrl\", if provided, must be at least one character long");
-        }
-
-        if (!params.containsKey("authors")) {
-            throw new IllegalArgumentException("missing param \"freeBookURL\"");
-        }
-        Authors authors = (Authors) params.get("authors");
-        if (authors.names().size() < 1) {
-            throw new IllegalArgumentException("param \"authors\" needs at least one author");
-        }
-        for (String author : authors.names()) {
-            if (author.length() < 1) {
-                throw new IllegalArgumentException("each author in param \"authors\" must be at least one character long");
+        boolean hasProductPageUrl = (boolean) params.get("hasProductPageUrl");
+        String productPageUrl = null;
+        if (hasProductPageUrl) {
+            productPageUrl = (String) params.get("productPageUrl");
+            if (productPageUrl.length() < 1) {
+                throw new IllegalArgumentException("param \"productPageUrl\", if provided, must be at least one character long");
             }
         }
 
-        return new TitleData(title, pubDateMonth, pubDateYear, productPageUrl, authors);
+        // authors
+        if (!params.containsKey("authorsNames")) {
+            throw new IllegalArgumentException("missing param \"authorsNames\"");
+        }
+        // TODO: Investigate warning "Unchecked cast: 'java.lang.Object' to 'java.util.List<java.lang.String>'"
+        List<String> authorsNames = (List<String>) params.get("authors");
+        if (authorsNames.size() < 1) {
+            throw new IllegalArgumentException("param \"authorsNames\" needs at least one author");
+        }
+        for (String name : authorsNames) {
+            if (name.length() < 1) {
+                throw new IllegalArgumentException("each string in param \"authorsNames\" must be at least one character long");
+            }
+        }
+        if (!params.containsKey("authorsMore")) {
+            throw new IllegalArgumentException("missing param \"authorsMore\"");
+        }
+        boolean authorsMore = (boolean) params.get("authorsMore");
+
+        return new TitleData(title, new PublicationDate(pubDateMonth, pubDateYear),
+                Optional.ofNullable(productPageUrl), new Authors(authorsNames, authorsMore));
+    }
+
+    /**
+     * Returns an OpenWhisk params map representation of the record.
+     * @return The map.
+     */
+    Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("title", title);
+        map.put("pubDateMonth", pubDate.month());
+        map.put("pubDateYear", pubDate.year());
+        map.put("hasProductPageUrl", productPageUrl.isPresent());
+        map.put("productPageUrl", productPageUrl.orElse(null));
+        map.put("authorsNames", authors.names());
+        map.put("authorsMore", authors.more());
+        return map;
     }
 }
