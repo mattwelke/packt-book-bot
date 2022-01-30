@@ -35,7 +35,7 @@ Separate OpenWhisk actions run to accomplish each use case:
 
 ### title fetcher
 
-Java action that scrapes the packtpub.com site to get which title is the free eBook of the day, as well additional info useful for logging, like publication date and author(s).
+Java action that scrapes the packtpub.com site to get which title is the free eBook of the day, as well additional info useful for logging, like publication date and author(s). It tries to perform more web scraping with Google to find the product page URL, but emits the event whether it's able to do so or not. The "productPageUrl" property in the emitted event is optional. Consumers of the events must check whether it's present before trying to use it.
 
 Source code located in `title-fetcher` directory.
 
@@ -71,7 +71,7 @@ async function main(params) {
 
 ### tweeter
 
-Java action that, upon a free eBook of the day being released, tweets a message about the title. It attempts to obtain the product page URL (ex. https://www.packtpub.com/product/learn-pfsense-2-4/9781789343113) before creating the Tweet by performing more web scraping because including the product page URL in the tweet body results in Twitter rendering a nicer-looking Tweet with an image preview. If this additional web scraping fails, it falls back to a minimal tweet body formed from just the title data from the event, and links the tweet reader to the static URL of the free learning page (https://www.packtpub.com/free-learning).
+Java action that, upon a free eBook of the day being released, tweets a message about the title. It checks whether the data from the event includes the product page URL. If so, it includes it in a "detailed" tweet. Because the detailed tweets include the product page URL, they're rendered nicer by Twitter than tweets that only have the free learning URL. If the event doesn't have the product page URL, this action uses a "minimal" tweet designed to at least point the Twitter user to the page they can visit to download the free book, even if the Tweet is rendered kind of ugly.
 
 Source code located in `tweeter` directory.
 

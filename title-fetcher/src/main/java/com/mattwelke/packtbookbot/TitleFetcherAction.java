@@ -47,12 +47,12 @@ public class TitleFetcherAction extends Action {
 
             logger.log(Level.INFO, "Done parsing page(s) for data. Title = {0}. Publication date = {1}. Author(s) = {2}.", new Object[]{title, pubDate, authors});
 
-            return Map.of(
-                    "title", title,
-                    "pubDateMonth", pubDate.month(),
-                    "pubDateYear", pubDate.year(),
-                    "productPageUrl", productPageUrl,
-                    "authors", authors);
+            return new TitleData(
+                    title,
+                    pubDate,
+                    productPageUrl,
+                    authors
+            ).toMap();
         } catch (Exception ex) {
             throw new RuntimeException(String.format("Failed to fetch title data (error: %s).", ex.getMessage()), ex);
         }
