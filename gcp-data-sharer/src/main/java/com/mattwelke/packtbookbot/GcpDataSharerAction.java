@@ -110,7 +110,7 @@ public class GcpDataSharerAction extends Action {
     /**
      * For local testing.
      */
-    public static void main(String[] args) throws RuntimeException {
+    public static void main(String[] args) {
         new GcpDataSharerAction().invoke(Map.of(
                 "title", "Hands-On Software Engineering with Python",
                 "pubDateMonth", "October",
