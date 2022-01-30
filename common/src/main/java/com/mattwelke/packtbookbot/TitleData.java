@@ -66,7 +66,7 @@ public record TitleData(
             throw new IllegalArgumentException("missing param \"authorsNames\"");
         }
         // TODO: Investigate warning "Unchecked cast: 'java.lang.Object' to 'java.util.List<java.lang.String>'"
-        List<String> authorsNames = (List<String>) params.get("authors");
+        List<String> authorsNames = (List<String>) params.get("authorsNames");
         if (authorsNames.size() < 1) {
             throw new IllegalArgumentException("param \"authorsNames\" needs at least one author");
         }
