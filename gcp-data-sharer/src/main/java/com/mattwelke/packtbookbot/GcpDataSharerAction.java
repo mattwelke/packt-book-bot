@@ -5,81 +5,72 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.BigQueryOptions;
-import com.google.cloud.bigquery.InsertAllRequest;
-import com.google.cloud.bigquery.InsertAllResponse;
-import com.google.cloud.bigquery.TableId;
+import com.google.cloud.bigquery.*;
 import com.owextendedruntimes.actiontest.Action;
 
-/**
- * Given data about the Packt free book of the day, shares it publicly by
- * writing it to Google Cloud Platform. Right now, that means inserting a row
- * into a BigQuery table in a public BigQuery dataset.
- */
+
 public class GcpDataSharerAction extends Action {
     private static final String datasetName = "public_data";
     private static final String tableName = "free_ebook_of_the_day";
 
+    private final Logger logger = Logger.getLogger(GcpDataSharerAction.class.getName());
+
     /**
-     * Given data about the title, shares it via GCP.
+     * Given data about the Packt free book of the day, shares it publicly by writing it to Google Cloud Platform. Right
+     * now, that means inserting a row into a BigQuery table in a public BigQuery dataset.
+     *
+     * @param params the OpenWhisk action invocation input.
+     * @return the output. Right now, this is just information about the BigQuery insert response, so that OpenWhisk
+     * logs it.
+     * @throws RuntimeException
      */
     @Override
     public Map<String, Object> invoke(Map<String, Object> params) throws RuntimeException {
         try {
-            var data = TitleData.of(params);
-            var bigquery = bigqueryClient(params);
+            TitleData data = TitleData.of(params);
+            BigQuery bigquery = bigqueryClient(params);
 
-            InsertAllResponse response = bigquery.insertAll(
-                    InsertAllRequest.newBuilder(TableId.of(datasetName, tableName))
-                            .addRow(row(data))
-                            .build());
+            InsertAllResponse response = bigquery.insertAll(InsertAllRequest.newBuilder(
+                    TableId.of(datasetName, tableName)).addRow(row(data)).build());
 
             if (response.hasErrors()) {
-                var insertErrors = response.getInsertErrors().entrySet();
-                throw new RuntimeException(String.format("failed to insert into BigQuery: %s", insertErrors));
+                logger.log(Level.SEVERE, "Errors from BigQuery insert: {}", response.getInsertErrors());
+                throw new CouldNotShareDataException("BigQuery insert unsuccessful.");
             }
-
             return Map.of("bigqueryInsertResponse", response);
         } catch (Exception ex) {
-            throw new RuntimeException(String.format("failed to share data via GCP: %s", ex.getMessage()), ex);
+            throw new RuntimeException("Failed to share data via GCP.", ex);
         }
     }
 
     /**
-     * Given a params map, returns an authenticated BigQuery client.
+     * Returns a BigQuery client authenticated with credentials in an OpenWhisk params map.
      *
-     * @param params The params map from the action invocation.
-     * @return A BigQuery client build from credentials in the params map.
-     * @throws IOException when it fails to load GCP credentials from the provided params map.
+     * @param params the params map from the action invocation.
+     * @return a BigQuery client built from credentials in the params map.
+     * @throws IOException when GoogleCredentials.fromStream throws the exception.
      */
     private static BigQuery bigqueryClient(Map<String, Object> params) throws IOException {
         if (!params.containsKey("gcpCreds") || ((String) params.get("gcpCreds")).length() < 1) {
             throw new IllegalArgumentException("missing param gcpCreds");
         }
 
-        var gcpCredsBytes = Base64.getDecoder().decode((String) params.get("gcpCreds"));
-
+        byte[] gcpCredsBytes = Base64.getDecoder().decode((String) params.get("gcpCreds"));
         GoogleCredentials credentials = GoogleCredentials.fromStream(new ByteArrayInputStream(gcpCredsBytes));
 
-        return BigQueryOptions.newBuilder()
-                .setCredentials(credentials)
-                .build()
-                .getService();
+        return BigQueryOptions.newBuilder().setCredentials(credentials).build().getService();
     }
 
     /**
      * Given title data, returns a row to insert into BigQuery.
      *
-     * @param data The title data.
-     * @return The row to insert.
+     * @param data the title data.
+     * @return the row to insert.
      */
     private static Map<String, Object> row(TitleData data) {
         Authors authors = data.authors();
@@ -92,17 +83,15 @@ public class GcpDataSharerAction extends Action {
 
         rowContent.put("title", data.title());
 
-        rowContent.put("publication_date", String.format("%s-%s-01",
-                data.pubDate().year(), PublicationDateMonths.monthNumber(data.pubDate().month())));
+        rowContent.put("publication_date", String.format("%s-%s-01", data.pubDate().year(),
+                PublicationDateMonths.monthNumber(data.pubDate().month())));
 
         // TODO: Deprecate this field because we have the new authors_v2 field.
         rowContent.put("authors", authors.names());
 
         rowContent.put("inserted_at", Instant.now().toString());
 
-        rowContent.put("authors_v2", Map.of(
-                "names", authors.names(),
-                "all_present", !authors.more()));
+        rowContent.put("authors_v2", Map.of("names", authors.names(), "all_present", !authors.more()));
 
         return rowContent;
     }

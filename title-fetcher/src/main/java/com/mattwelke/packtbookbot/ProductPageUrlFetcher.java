@@ -92,7 +92,7 @@ public class ProductPageUrlFetcher {
             throw ex;
         } catch (Exception ex) {
             throw new CouldNotFetchException(
-                    String.format("failed to fetch product page URL for title %s: %s", title, ex.getMessage()), ex);
+                    String.format("Failed to fetch product page URL for title %s.", title), ex);
         }
     }
 }

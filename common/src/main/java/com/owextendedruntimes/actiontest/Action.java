@@ -7,8 +7,9 @@ import java.util.Map;
  * method to implement their actions.
  * <p>
  * This is an experimental version of the base class. That's why its package name includes the word "test". It's
- * important that its package name matches the package name of the class in https://github.com/ow-extended-runtimes/java-17/blob/main/src/main/java/com/owextendedruntimes/actiontest/Action.java,
- * otherwise the actions that use it here will fail at runtime because the proxy in the Java 17 runtime will experience
+ * important that its package name matches the package name of the class in Action.java in
+ * <a href="https://github.com/ow-extended-runtimes/java-17">github.com/ow-extended-runtimes/java-17</a>, otherwise the
+ * actions that use it here will fail at runtime because the proxy in the Java 17 runtime will experience
  * a {@link ClassCastException}.
  */
 public abstract class Action {

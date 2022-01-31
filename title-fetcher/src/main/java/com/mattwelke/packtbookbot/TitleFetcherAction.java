@@ -22,7 +22,7 @@ public class TitleFetcherAction extends Action {
     @Override
     public Map<String, Object> invoke(Map<String, Object> params) {
         try {
-            var freeLearningFetcher = new FreeLearningPageDataFetcher();
+            FreeLearningPageDataFetcher freeLearningFetcher = new FreeLearningPageDataFetcher();
 
             String title = freeLearningFetcher.title();
             PublicationDate pubDate = freeLearningFetcher.pubDate();
@@ -54,7 +54,7 @@ public class TitleFetcherAction extends Action {
                     authors
             ).toMap();
         } catch (Exception ex) {
-            throw new RuntimeException(String.format("Failed to fetch title data (error: %s).", ex.getMessage()), ex);
+            throw new RuntimeException("Failed to fetch title data.", ex);
         }
     }
 
@@ -62,7 +62,7 @@ public class TitleFetcherAction extends Action {
      * For local testing.
      */
     public static void main(String[] args) {
-        var data = new TitleFetcherAction().invoke(Map.of());
+        Map<String, Object> data = new TitleFetcherAction().invoke(Map.of());
         System.out.println("Fetched data for title = " + data);
     }
 }
