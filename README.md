@@ -23,9 +23,11 @@ ORDER BY day DESC
 
 ![screenshot of BigQuery results](img/bigquery_results.png)
 
-Any user authenticated to GCP is able to view this table's schema and query it because of its dataset's IAM configuration:
+Any principal authenticated to GCP is able to view this table's schema and query it because of its dataset's IAM configuration:
 
 ![Screenshot of BigQuery dataset IAM](img/bigquery_iam.png)
+
+See https://cloud.google.com/iam/docs/overview for more information on GCP IAM.
 
 ## Tech stack & architecture
 
