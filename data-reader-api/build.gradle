@@ -1,0 +1,28 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+
+    // https://github.com/googleapis/java-bigquery
+    implementation platform('com.google.cloud:libraries-bom:24.2.0')
+    implementation 'com.google.cloud:google-cloud-bigquery'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
