@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.bigquery.*;
@@ -28,6 +29,9 @@ public class DataReaderApiAction extends Action {
         try {
             if (bqClient == null) {
                 bqClient = bigqueryClient(params);
+                logger.log(Level.INFO, "Created new BigQuery client instance.");
+            } else {
+                logger.log(Level.INFO, "Reusing existing BigQuery client instance.");
             }
             return Map.of("bqResults", queryData());
         } catch (Exception ex) {
@@ -37,6 +41,7 @@ public class DataReaderApiAction extends Action {
 
     /**
      * Queries BigQuery to get the 50 most recent free eBooks of the day.
+     *
      * @return The list of books.
      * @throws InterruptedException when the BigQuery client library does.
      */
@@ -73,16 +78,12 @@ public class DataReaderApiAction extends Action {
         TableResult result = queryJob.getQueryResults();
 
         // Parse the results.
-        List<BookResult> books = new ArrayList<>();
-        for (FieldValueList row : result.iterateAll()) {
-            BookResult book = new BookResult(
-                    row.get("day").getStringValue(),
-                    row.get("title").getStringValue(),
-                    row.get("authors").getStringValue()
-            );
-            logger.log(Level.INFO, "Parsed book from query results: {}", book);
-            books.add(book);
-        }
+        List<BookResult> books = StreamSupport.stream(result.iterateAll().spliterator(), false)
+                .map(row -> new BookResult(
+                        row.get("day").getStringValue(),
+                        row.get("title").getStringValue(),
+                        row.get("authors").getStringValue()
+                )).toList();
         logger.log(Level.INFO, "Finished parsing books. Ended up with {} in total.", books.size());
 
         return books;
