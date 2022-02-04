@@ -84,7 +84,7 @@ public class DataReaderApiAction extends Action {
                         row.get("title").getStringValue(),
                         row.get("authors").getStringValue()
                 )).toList();
-        logger.log(Level.INFO, "Finished parsing books. Ended up with {} in total.", books.size());
+        logger.log(Level.INFO, "Finished parsing books. Ended up with {0} in total.", books.size());
 
         return books;
     }
