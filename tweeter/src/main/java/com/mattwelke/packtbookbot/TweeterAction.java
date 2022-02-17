@@ -71,12 +71,14 @@ public class TweeterAction extends Action {
                     FREE_LEARNING);
         }
 
-        logger.log(Level.INFO, "Finished tweet = \"{}\".", tweet);
+        logger.log(Level.INFO, "Finished tweet = \"{0}\".", tweet);
 
         try {
             HttpResponse response = postToTwitter(tweet, TwitterSecrets.of(params));
             logger.log(Level.INFO, "Tweeted. Response from Twitter: {0}.", response);
-            return Map.of("tweetResponse", response);
+            return Map.of(
+                "tweetResponseStatusLine", response.getStatusLine().toString(),
+                "tweetResponseBody", response.getEntity().toString());
         } catch (Exception ex) {
             throw new RuntimeException("Could not tweet.", ex);
         }

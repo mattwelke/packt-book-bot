@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ProductPageDataFetcher {
     private final Document doc;
