@@ -1,4 +1,4 @@
-name: Build and deploy to ICF
+name: Run tests
 
 on:
   pull_request:
