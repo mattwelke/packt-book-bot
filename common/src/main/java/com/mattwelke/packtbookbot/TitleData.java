@@ -46,7 +46,6 @@ public record TitleData(
         if (pubDateYear.length() < 1) {
             throw new IllegalArgumentException("param \"pubDateYear\" must be at least one character long");
         }
-        PublicationDate pubDate = new PublicationDate(pubDateMonth, pubDateYear);
 
         // product page URL
         if (!params.containsKey("hasProductPageUrl")) {
