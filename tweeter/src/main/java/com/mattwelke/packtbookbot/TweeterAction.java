@@ -75,9 +75,8 @@ public class TweeterAction extends Action {
 
         try {
             HttpResponse response = postToTwitter(tweet, TwitterSecrets.of(params));
-            String twitterResponseStatus = response.getStatusLine().toString();
-            logger.log(Level.INFO, "Tweeted. Response status from Twitter: {}.", twitterResponseStatus);
-            return Map.of("tweetResponseStatus", twitterResponseStatus);
+            logger.log(Level.INFO, "Tweeted. Response from Twitter: {0}.", response);
+            return Map.of("tweetResponse", response);
         } catch (Exception ex) {
             throw new RuntimeException("Could not tweet.", ex);
         }
