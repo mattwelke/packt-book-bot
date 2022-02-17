@@ -9,7 +9,7 @@ on:
       - .github/workflows/codeql-analysis.yml
 
 jobs:
-  build-and-deploy:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
