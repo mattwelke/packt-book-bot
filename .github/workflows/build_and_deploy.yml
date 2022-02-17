@@ -18,6 +18,8 @@ jobs:
         distribution: 'temurin'
         java-version: '16'
     - uses: gradle/wrapper-validation-action@v1
+    - name: Run tests
+      run: ./gradlew test
     - name: Install IBM Cloud CLI
       run: |
         curl -sL https://raw.githubusercontent.com/IBM-Cloud/ibm-cloud-developer-tools/master/linux-installer/idt-installer | bash
