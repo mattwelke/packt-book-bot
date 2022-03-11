@@ -13,7 +13,7 @@ dependencies {
     implementation project(':common')
 
     // https://github.com/googleapis/java-bigquery
-    implementation platform('com.google.cloud:libraries-bom:24.4.0')
+    implementation platform('com.google.cloud:libraries-bom:25.0.0')
     implementation 'com.google.cloud:google-cloud-bigquery'
 }
 
