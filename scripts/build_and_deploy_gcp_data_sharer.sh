@@ -17,7 +17,7 @@ JAR_PATH="${BUILD_DIR}/libs/gcp-data-sharer-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew gcp-data-sharer:shadowJar
+./gradlew -Pgpr.user=$3 -Pgpr.key=$4 gcp-data-sharer:shadowJar
 
 ibmcloud login --apikey $1
 

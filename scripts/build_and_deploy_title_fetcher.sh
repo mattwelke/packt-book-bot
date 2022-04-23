@@ -17,7 +17,7 @@ JAR_PATH="${BUILD_DIR}/libs/title-fetcher-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew title-fetcher:shadowJar
+./gradlew -Pgpr.user=$2 -Pgpr.key=$3 title-fetcher:shadowJar
 
 ibmcloud login --apikey $1
 

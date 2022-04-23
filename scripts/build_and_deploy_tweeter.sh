@@ -17,7 +17,7 @@ JAR_PATH="${BUILD_DIR}/libs/tweeter-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew tweeter:shadowJar
+./gradlew -Pgpr.user=$6 -Pgpr.key=$7 tweeter:shadowJar
 
 ibmcloud login --apikey $1
 
