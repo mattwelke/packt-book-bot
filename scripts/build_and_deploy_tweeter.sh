@@ -28,7 +28,7 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
   --main "com.mattwelke.packtbookbot.TweeterAction" \
-  --docker "owextendedruntimes/java-17:202202170139" \
+  --docker "mwelke/openwhisk-runtime-java-18:202204230659" \
   --param twitterConsumerKey $2 \
   --param twitterConsumerSecret $3 \
   --param twitterToken $4 \
