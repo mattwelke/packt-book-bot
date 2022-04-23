@@ -7,6 +7,13 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/mattwelke/openwhisk-runtime-java-api")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GPR_USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("GPR_TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -14,13 +21,14 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'
+    implementation 'com.mattwelke.owr.java:openwhisk-runtime-java-api:1.0.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 

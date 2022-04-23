@@ -7,6 +7,13 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/mattwelke/openwhisk-runtime-java-api")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GPR_USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("GPR_TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -15,10 +22,11 @@ dependencies {
     // https://github.com/googleapis/java-bigquery
     implementation platform('com.google.cloud:libraries-bom:25.1.0')
     implementation 'com.google.cloud:google-cloud-bigquery'
+    implementation 'com.mattwelke.owr.java:openwhisk-runtime-java-api:1.0.0'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(16)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
