@@ -17,7 +17,7 @@ JAR_PATH="${BUILD_DIR}/libs/gcp-data-sharer-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew gcp-data-sharer:shadowJar
+./gradlew -Pgpr.user=$3 -Pgpr.key=$4 gcp-data-sharer:shadowJar
 
 ibmcloud login --apikey $1
 
@@ -28,5 +28,5 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
   --main "com.mattwelke.packtbookbot.GcpDataSharerAction" \
-  --docker "owextendedruntimes/java-17:202202170139" \
+  --docker "mwelke/openwhisk-runtime-java-18:202204230659" \
   --param gcpCreds $2

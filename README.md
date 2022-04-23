@@ -97,12 +97,8 @@ Legend:
 
 **Why Java?**
 
-* I prefer working with compiled programming langauges and I wanted to practice my Java.
+* I prefer working with compiled programming languages and I wanted to practice my Java.
 * Despite starting up slower than other programming languages supported by OpenWhisk, because this use case is for background processing (no user waits for it to complete), this isn't an issue.
-
-**Why Java 16?**
-
-Despite deploying to a Java 17 runtime, because GitHub's CodeQL only works with up to Java 16 right now, the action code is Java 16.
 
 **Why IBM Cloud?**
 

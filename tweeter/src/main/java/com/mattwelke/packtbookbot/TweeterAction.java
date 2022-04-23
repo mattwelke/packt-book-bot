@@ -7,12 +7,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.owextendedruntimes.actiontest.Action;
+import com.mattwelke.owr.java.Action;
 import com.stackoverflow.smile.TwitterOauthHeaderGenerator;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
