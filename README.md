@@ -31,7 +31,7 @@ See https://cloud.google.com/iam/docs/overview for more information on GCP IAM.
 
 ## Tech stack & architecture
 
-Written using Java 16, deployed to IBM Cloud Functions using the custom Java 17 runtime from https://github.com/ow-extended-runtimes/java-17.
+Written using Java 17, deployed to IBM Cloud Functions using my custom Java 18 runtime from https://github.com/mattwelke/openwhisk-runtime-java-18.
 
 Uses a periodic trigger to begin processing at 12:01am every day. Uses a custom trigger to decouple the data retrieval from use cases for the data. This enables multiple use cases for the fetched data such as tweeting from a Twitter bot and building a public BigQuery dataset on GCP. In the future, this might include publishing to a GCP Pub/Sub topic too.
 
