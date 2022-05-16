@@ -28,33 +28,33 @@ jobs:
         # Only present for masking in GHA logs
         IBM_CLOUD_SERVICE_ID: ${{ secrets.IBM_CLOUD_SERVICE_ID }}
         IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
-        # Present to be used to call build and deploy script.
-        IBM_CLOUD_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-        GPR_USER: ${{ env.GPR_USER }}
-        GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
-      run: ./scripts/build_and_deploy_title_fetcher.sh $IBM_CLOUD_API_KEY $GPR_USER $GPR_TOKEN
+      run: |
+        ./scripts/build_and_deploy_title_fetcher.sh \
+          ${{ secrets.DEPLOY_API_KEY }} \
+          ${{ env.GPR_USER }} \
+          ${{ secrets.GPR_TOKEN }}
     - name: Build and deploy tweeter action
       env:
         # Only present for masking in GHA logs
         IBM_CLOUD_SERVICE_ID: ${{ secrets.IBM_CLOUD_SERVICE_ID }}
         IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
-        # Present to be used to call build and deploy script.
-        IBM_CLOUD_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
-        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
-        TWITTER_TOKEN: ${{ secrets.TWITTER_TOKEN }}
-        TWITTER_TOKEN_SECRET: ${{ secrets.TWITTER_TOKEN_SECRET }}
-        GPR_USER: ${{ env.GPR_USER }}
-        GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
-      run: ./scripts/build_and_deploy_tweeter.sh $IBM_CLOUD_API_KEY $TWITTER_CONSUMER_KEY $TWITTER_CONSUMER_SECRET $TWITTER_TOKEN $TWITTER_TOKEN_SECRET $GPR_USER $GPR_TOKEN
+      run: |
+        ./scripts/build_and_deploy_tweeter.sh \
+          ${{ secrets.DEPLOY_API_KEY }} \
+          ${{ secrets.TWITTER_CONSUMER_KEY }} \
+          ${{ secrets.TWITTER_CONSUMER_SECRET }} \
+          ${{ secrets.TWITTER_TOKEN }} \
+          ${{ secrets.TWITTER_TOKEN_SECRET }} \
+          ${{ env.GPR_USER }} \
+          ${{ secrets.GPR_TOKEN }}
     - name: Build and deploy GCP data sharer action
       env:
         # Only present for masking in GHA logs
         IBM_CLOUD_SERVICE_ID: ${{ secrets.IBM_CLOUD_SERVICE_ID }}
         IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
-        # Present to be used to call build and deploy script.
-        IBM_CLOUD_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-        GCP_CREDS_BASE_64: ${{ secrets.GCP_CREDS_BASE_64 }}
-        GPR_USER: ${{ env.GPR_USER }}
-        GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
-      run: ./scripts/build_and_deploy_gcp_data_sharer.sh $IBM_CLOUD_API_KEY $GCP_CREDS_BASE_64 $GPR_USER $GPR_TOKEN
+      run: |
+        ./scripts/build_and_deploy_gcp_data_sharer.sh \
+          ${{ secrets.DEPLOY_API_KEY }} \
+          ${{ secrets.GCP_CREDS_BASE_64 }} \
+          ${{ env.GPR_USER }} \
+          ${{ secrets.GPR_TOKEN }}
