@@ -20,7 +20,7 @@ dependencies {
     implementation project(':common')
 
     // https://github.com/googleapis/java-bigquery
-    implementation platform('com.google.cloud:libraries-bom:25.3.0')
+    implementation platform('com.google.cloud:libraries-bom:25.4.0')
     implementation 'com.google.cloud:google-cloud-bigquery'
     implementation 'com.mattwelke.owr.java:openwhisk-runtime-java-api:1.0.0'
 }
