@@ -23,7 +23,7 @@ dependencies {
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.15.3'
     implementation 'com.mattwelke.owr.java:openwhisk-runtime-java-api:1.0.0'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
 }
 
 java {
