@@ -5,6 +5,8 @@
 
 Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook of the day in BigQuery daily.
 
+Uses the Java 18 runtime at https://github.com/mattwelke/apache-openwhisk-runtime-java-18.
+
 ## Features
 
 ### Free eBook of the day - every day at 12:01am UTC
@@ -12,6 +14,8 @@ Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook
 #### Tweeted from Twitter bot
 
 ![Screenshot of free eBook of the day tweet](img/tweet_example.png)
+
+*Note: As of Dec 2022, this feature no longer exists. In the future, it may be replaced by a Mastodon bot.*
 
 #### Logged in a public BigQuery table on GCP (Google Cloud Platform)
 

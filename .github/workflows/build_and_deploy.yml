@@ -30,23 +30,7 @@ jobs:
         IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
       run: |
         ./scripts/build_and_deploy_title_fetcher.sh \
-          ${{ secrets.DEPLOY_API_KEY }} \
-          ${{ env.GPR_USER }} \
-          ${{ secrets.GPR_TOKEN }}
-    - name: Build and deploy tweeter action
-      env:
-        # Only present for masking in GHA logs
-        IBM_CLOUD_SERVICE_ID: ${{ secrets.IBM_CLOUD_SERVICE_ID }}
-        IBM_CLOUD_ACCOUNT_ID: ${{ secrets.IBM_CLOUD_ACCOUNT_ID }}
-      run: |
-        ./scripts/build_and_deploy_tweeter.sh \
-          ${{ secrets.DEPLOY_API_KEY }} \
-          ${{ secrets.TWITTER_CONSUMER_KEY }} \
-          ${{ secrets.TWITTER_CONSUMER_SECRET }} \
-          ${{ secrets.TWITTER_TOKEN }} \
-          ${{ secrets.TWITTER_TOKEN_SECRET }} \
-          ${{ env.GPR_USER }} \
-          ${{ secrets.GPR_TOKEN }}
+          ${{ secrets.DEPLOY_API_KEY }}
     - name: Build and deploy GCP data sharer action
       env:
         # Only present for masking in GHA logs
@@ -55,6 +39,4 @@ jobs:
       run: |
         ./scripts/build_and_deploy_gcp_data_sharer.sh \
           ${{ secrets.DEPLOY_API_KEY }} \
-          ${{ secrets.GCP_CREDS_BASE_64 }} \
-          ${{ env.GPR_USER }} \
-          ${{ secrets.GPR_TOKEN }}
+          ${{ secrets.GCP_CREDS_BASE_64 }}
