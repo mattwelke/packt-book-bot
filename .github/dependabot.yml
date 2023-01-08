@@ -8,12 +8,8 @@ updates:
   - package-ecosystem: "gradle" # See documentation for possible values
     directory: "/gcp-data-sharer" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "gradle" # See documentation for possible values
     directory: "/title-fetcher" # Location of package manifests
     schedule:
-      interval: "daily"
-  - package-ecosystem: "gradle" # See documentation for possible values
-    directory: "/tweeter" # Location of package manifests
-    schedule:
-      interval: "daily"
+      interval: "weekly"

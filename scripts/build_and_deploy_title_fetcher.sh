@@ -17,7 +17,7 @@ JAR_PATH="${BUILD_DIR}/libs/title-fetcher-all.jar"
 
 rm -r $BUILD_DIR 2> /dev/null
 
-./gradlew -Pgpr.user=$2 -Pgpr.key=$3 title-fetcher:shadowJar
+./gradlew title-fetcher:shadowJar
 
 ibmcloud login --apikey $1
 
@@ -28,4 +28,4 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
   --main "com.mattwelke.packtbookbot.TitleFetcherAction" \
-  --docker "mwelke/openwhisk-runtime-java-18:202204230659"
+  --docker "mwelke/openwhisk-runtime-java-18:202301080215"
