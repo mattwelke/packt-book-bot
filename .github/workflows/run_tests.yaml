@@ -19,4 +19,4 @@ jobs:
         java-version: '17'
     - uses: gradle/wrapper-validation-action@v1
     - name: Run tests
-      run: ./gradlew -Pgpr.user=mattwelke -Pgpr.key=${{ secrets.GPR_TOKEN }} test
+      run: ./gradlew test
