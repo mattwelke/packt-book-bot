@@ -5,7 +5,7 @@
 
 Bot that tweets (https://twitter.com/PacktBookBot) and logs the Packt free eBook of the day in BigQuery daily.
 
-Uses the Java 18 runtime at https://github.com/mattwelke/apache-openwhisk-runtime-java-18.
+Uses the Java 19 runtime at https://github.com/mattwelke/apache-openwhisk-runtime-java-19.
 
 ## Features
 
@@ -35,7 +35,7 @@ See https://cloud.google.com/iam/docs/overview for more information on GCP IAM.
 
 ## Tech stack & architecture
 
-Written using Java 17, deployed to IBM Cloud Functions using my custom Java 18 runtime from https://github.com/mattwelke/openwhisk-runtime-java-18.
+Written using Java 17, deployed to IBM Cloud Functions using my custom Java 19 runtime from https://github.com/mattwelke/openwhisk-runtime-java-19.
 
 Uses a periodic trigger to begin processing at 12:01am every day. Uses a custom trigger to decouple the data retrieval from use cases for the data. This enables multiple use cases for the fetched data such as tweeting from a Twitter bot and building a public BigQuery dataset on GCP. In the future, this might include publishing to a GCP Pub/Sub topic too.
 
