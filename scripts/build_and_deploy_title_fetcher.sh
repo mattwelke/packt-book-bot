@@ -28,4 +28,4 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
   --main "com.mattwelke.packtbookbot.TitleFetcherAction" \
-  --docker "mwelke/openwhisk-runtime-java-19:202301090523"
+  --docker "mwelke/openwhisk-runtime-java-19:202302131955"
