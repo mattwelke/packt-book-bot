@@ -13,7 +13,7 @@ dependencies {
     implementation project(':common')
 
     // https://github.com/googleapis/java-bigquery
-    compileOnly platform('com.google.cloud:libraries-bom:26.6.0')
+    compileOnly platform('com.google.cloud:libraries-bom:26.7.0')
     compileOnly 'com.google.cloud:google-cloud-bigquery'
 }
 
