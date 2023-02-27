@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.0.0'
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
 }
@@ -13,7 +13,7 @@ dependencies {
     implementation project(':common')
 
     // https://github.com/googleapis/java-bigquery
-    compileOnly platform('com.google.cloud:libraries-bom:26.8.0')
+    compileOnly platform('com.google.cloud:libraries-bom:26.9.0')
     compileOnly 'com.google.cloud:google-cloud-bigquery'
 }
 
