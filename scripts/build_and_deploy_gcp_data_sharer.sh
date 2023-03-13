@@ -28,5 +28,5 @@ ibmcloud fn namespace target $FUNCTIONS_NAMESPACE
 # Do deploy using action update (aka create or update) command
 ibmcloud fn action update $ACTION_NAME $JAR_PATH \
   --main "com.mattwelke.packtbookbot.GcpDataSharerAction" \
-  --docker "mwelke/openwhisk-runtime-java-19:202303061747" \
+  --docker "mwelke/openwhisk-runtime-java-19:202303131515" \
   --param gcpCreds $2
